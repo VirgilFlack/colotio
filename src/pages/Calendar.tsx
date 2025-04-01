@@ -13,10 +13,18 @@ interface ColorData {
   note?: string;
 }
 
+// Define an interface for possible legacy data formats
+interface LegacyColorData {
+  day: number;
+  lightColor?: string;
+  darkColor?: string;
+  note?: string;
+}
+
 interface UserData {
   datasetName: string;
   description?: string;
-  colorData: ColorData[];
+  colorData: (ColorData | LegacyColorData)[];
 }
 
 const CalendarPage = () => {
@@ -33,28 +41,26 @@ const CalendarPage = () => {
         const parsedData: UserData = JSON.parse(userData);
         
         // Process color data
-        const processedColorData = parsedData.colorData?.map(item => {
+        const processedColorData = parsedData.colorData?.map((item: ColorData | LegacyColorData) => {
           // Handle both new and legacy data formats
-          if ('lightColor' in item || 'darkColor' in item) {
-            if (item.lightColor) {
-              return {
-                day: item.day,
-                color: item.lightColor,
-                colorMode: 'light' as const,
-                note: item.note
-              };
-            } else if (item.darkColor) {
-              return {
-                day: item.day,
-                color: item.darkColor,
-                colorMode: 'dark' as const,
-                note: item.note
-              };
-            }
+          if ('lightColor' in item && item.lightColor) {
+            return {
+              day: item.day,
+              color: item.lightColor,
+              colorMode: 'light' as const,
+              note: item.note
+            };
+          } else if ('darkColor' in item && item.darkColor) {
+            return {
+              day: item.day,
+              color: item.darkColor,
+              colorMode: 'dark' as const,
+              note: item.note
+            };
           }
           
           // Return the item as is if it's already in the new format
-          return item;
+          return item as ColorData;
         });
         
         setColorData(processedColorData || []);
@@ -73,7 +79,7 @@ const CalendarPage = () => {
         <div className="flex flex-col gap-6 mt-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Color Calendar</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Colotio Calendar</h1>
               <p className="text-muted-foreground mt-1">
                 View your colors organized in a calendar format
               </p>
