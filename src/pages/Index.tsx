@@ -1,11 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
-import StatsCard from '@/components/StatsCard';
 import ColorChart from '@/components/ColorChart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, PlusCircle } from 'lucide-react';
+import { Calendar, PlusCircle, BarChart, LineChart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,7 +86,17 @@ const Index = () => {
     navigate('/data-input');
   };
   
-  // Get color stats
+  const goToCalendar = () => {
+    navigate('/calendar');
+  };
+  
+  const goToAnalytics = () => {
+    toast.info("Analytics page coming soon!", {
+      description: "This feature is under development.",
+      duration: 3000,
+    });
+  };
+  
   const getUniqueColorCount = (type: 'light' | 'dark') => {
     const uniqueColors = new Set(colorData
       .filter(item => item.colorMode === type)
@@ -97,7 +105,6 @@ const Index = () => {
     return uniqueColors.size;
   };
   
-  // Get most common color
   const getMostCommonColor = (type: 'light' | 'dark') => {
     const filteredColors = colorData.filter(item => item.colorMode === type);
     const colorCounts: Record<string, number> = {};
@@ -168,145 +175,160 @@ const Index = () => {
             </div>
           </div>
           
-          {hasData ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatsCard
-                  title="Color Entries"
-                  value={colorData.length}
-                  icon={<Calendar className="h-5 w-5" />}
-                  className="animate-fade-in"
-                />
-                <StatsCard
-                  title="Unique Light Colors"
-                  value={getUniqueColorCount('light')}
-                  icon={<div className="w-5 h-5 rounded-full bg-primary/20" />}
-                  trend={{ value: 100, isPositive: true }}
-                  variant="purple"
-                  className="animate-fade-in [animation-delay:100ms]"
-                />
-                <StatsCard
-                  title="Unique Dark Colors"
-                  value={getUniqueColorCount('dark')}
-                  icon={<div className="w-5 h-5 rounded-full bg-secondary" />}
-                  variant="blue"
-                  className="animate-fade-in [animation-delay:200ms]"
-                />
-                <StatsCard
-                  title="Most Common Dark"
-                  value={getMostCommonColor('dark').toUpperCase()}
-                  icon={<div className="w-5 h-5 rounded-full" style={{backgroundColor: getMostCommonColor('dark')}} />}
-                  className="animate-fade-in [animation-delay:300ms]"
-                />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <Card 
+              className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in"
+              onClick={goToDataInput}
+            >
+              <div className="flex flex-col items-center justify-center h-full space-y-4 p-6">
+                <div className="p-4 rounded-full bg-primary/10">
+                  <PlusCircle className="h-12 w-12 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold mb-2">Data Input</h2>
+                  <p className="text-muted-foreground">Add or edit your color collection data</p>
+                </div>
               </div>
+            </Card>
+            
+            <Card 
+              className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in [animation-delay:100ms]"
+              onClick={goToCalendar}
+            >
+              <div className="flex flex-col items-center justify-center h-full space-y-4 p-6">
+                <div className="p-4 rounded-full bg-primary/10">
+                  <Calendar className="h-12 w-12 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold mb-2">Calendar View</h2>
+                  <p className="text-muted-foreground">See your color data in a calendar format</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card 
+              className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in [animation-delay:200ms]"
+              onClick={goToAnalytics}
+            >
+              <div className="flex flex-col items-center justify-center h-full space-y-4 p-6">
+                <div className="p-4 rounded-full bg-primary/10">
+                  <BarChart className="h-12 w-12 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold mb-2">Analytics</h2>
+                  <p className="text-muted-foreground">View detailed analytics of your color data</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+          
+          {hasData ? (
+            <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="timeline">Timeline</TabsTrigger>
+                <TabsTrigger value="palette">Color Palette</TabsTrigger>
+                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              </TabsList>
               
-              <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                <TabsList>
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                  <TabsTrigger value="palette">Color Palette</TabsTrigger>
-                  <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                </TabsList>
+              <TabsContent value="overview" className="space-y-6">
+                <ColorChart
+                  title="30-Day Color Collection"
+                  data={colorData}
+                />
                 
-                <TabsContent value="overview" className="space-y-6">
-                  <ColorChart
-                    title="30-Day Color Collection"
-                    data={colorData}
-                  />
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Light Colors Timeline</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-2">
-                          {colorData.filter(item => item.colorMode === 'light').map((item, index) => (
-                            <div 
-                              key={index} 
-                              className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
-                              style={{ backgroundColor: item.color }}
-                              title={`Day ${item.day}: ${item.color}`}
-                            />
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Dark Colors Timeline</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-2">
-                          {colorData.filter(item => item.colorMode === 'dark').map((item, index) => (
-                            <div 
-                              key={index} 
-                              className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
-                              style={{ backgroundColor: item.color }}
-                              title={`Day ${item.day}: ${item.color}`}
-                            />
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="timeline">
-                  <div className="space-y-4">
-                    <h2 className="text-xl font-bold">30-Day Color Timeline</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {colorData.map((item, index) => (
-                        <Card key={index} className="overflow-hidden">
-                          <div className="h-24" style={{backgroundColor: item.color}}></div>
-                          <CardContent className="p-4">
-                            <h3 className="font-semibold">Day {item.day}</h3>
-                            <div className="mt-2 text-xs">
-                              <div>
-                                <span className="text-muted-foreground">Color: </span>
-                                {item.color}
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Mode: </span>
-                                {item.colorMode}
-                              </div>
-                              {item.note && (
-                                <p className="text-xs mt-2 italic">{item.note}</p>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="palette">
-                  <div className="space-y-4">
-                    <h2 className="text-xl font-bold">Color Palette Collection</h2>
-                    {renderColorPalettes()}
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="analytics">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Color Analysis</CardTitle>
+                      <CardTitle className="text-lg">Light Colors Timeline</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex justify-center">
-                      <div className="text-center p-12 max-w-md">
-                        <p className="text-muted-foreground">
-                          Advanced color analytics will be available in a future update.
-                          This will include color harmony analysis, trend detection, and
-                          color psychology insights.
-                        </p>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {colorData.filter(item => item.colorMode === 'light').map((item, index) => (
+                          <div 
+                            key={index} 
+                            className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
+                            style={{ backgroundColor: item.color }}
+                            title={`Day ${item.day}: ${item.color}`}
+                          />
+                        ))}
                       </div>
                     </CardContent>
                   </Card>
-                </TabsContent>
-              </Tabs>
-            </>
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Dark Colors Timeline</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {colorData.filter(item => item.colorMode === 'dark').map((item, index) => (
+                          <div 
+                            key={index} 
+                            className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
+                            style={{ backgroundColor: item.color }}
+                            title={`Day ${item.day}: ${item.color}`}
+                          />
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="timeline">
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold">30-Day Color Timeline</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {colorData.map((item, index) => (
+                      <Card key={index} className="overflow-hidden">
+                        <div className="h-24" style={{backgroundColor: item.color}}></div>
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold">Day {item.day}</h3>
+                          <div className="mt-2 text-xs">
+                            <div>
+                              <span className="text-muted-foreground">Color: </span>
+                              {item.color}
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Mode: </span>
+                              {item.colorMode}
+                            </div>
+                            {item.note && (
+                              <p className="text-xs mt-2 italic">{item.note}</p>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="palette">
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold">Color Palette Collection</h2>
+                  {renderColorPalettes()}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="analytics">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Color Analysis</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex justify-center">
+                    <div className="text-center p-12 max-w-md">
+                      <p className="text-muted-foreground">
+                        Advanced color analytics will be available in a future update.
+                        This will include color harmony analysis, trend detection, and
+                        color psychology insights.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           ) : (
             <div className="flex flex-col items-center justify-center p-12 border border-dashed rounded-lg mt-8">
               <Calendar className="h-16 w-16 text-muted-foreground/50 mb-4" />
