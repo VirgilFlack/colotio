@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -172,9 +171,9 @@ const Index = () => {
       <main className="container mx-auto px-4 pt-20">
         <div className="flex flex-col gap-6 mt-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
+            <div className="max-w-full">
               <h1 className="text-3xl font-bold tracking-tight">Welcome {userName}</h1>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 whitespace-normal break-words">
                 {positiveMessage}
               </p>
               {description && hasData && (
