@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, Search, Bell, UserCircle, PlusCircle, Calendar } from 'lucide-react';
 import { 
   Sheet, 
@@ -13,7 +13,15 @@ import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [searchValue, setSearchValue] = useState('');
+  const [userName, setUserName] = useState('');
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const storedName = localStorage.getItem('userName');
+    if (storedName) {
+      setUserName(storedName);
+    }
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-md border-b border-border z-50">
@@ -28,14 +36,14 @@ const Navbar = () => {
               </SheetTrigger>
               <SheetContent side="left">
                 <nav className="flex flex-col gap-4 mt-8">
-                  <Link to="/" className="text-lg font-medium hover:text-accent">Dashboard</Link>
+                  <Link to="/dashboard" className="text-lg font-medium hover:text-accent">Dashboard</Link>
                   <Link to="/data-input" className="text-lg font-medium hover:text-accent">Data Input</Link>
                   <Link to="/calendar" className="text-lg font-medium hover:text-accent">Calendar</Link>
                 </nav>
               </SheetContent>
             </Sheet>
           )}
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/dashboard" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-md bg-gradient-blue-purple flex items-center justify-center">
               <span className="text-white font-bold text-lg">C</span>
             </div>
@@ -59,7 +67,7 @@ const Navbar = () => {
           {!isMobile && (
             <>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/">Dashboard</Link>
+                <Link to="/dashboard">Dashboard</Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/calendar" className="flex items-center gap-2">
@@ -79,8 +87,9 @@ const Navbar = () => {
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full"></span>
           </Button>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" className="flex items-center gap-2">
             <UserCircle className="h-5 w-5" />
+            {userName && <span className="text-sm hidden sm:inline-block">{userName}</span>}
           </Button>
         </div>
       </div>

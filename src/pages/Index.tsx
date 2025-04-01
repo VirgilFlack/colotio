@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -31,8 +32,15 @@ const Index = () => {
   const [datasetName, setDatasetName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [hasData, setHasData] = useState(false);
+  const [userName, setUserName] = useState('User');
   
   useEffect(() => {
+    // Get user name from localStorage
+    const storedName = localStorage.getItem('userName');
+    if (storedName) {
+      setUserName(storedName);
+    }
+
     const userData = localStorage.getItem('userData');
     
     if (userData) {
@@ -146,7 +154,7 @@ const Index = () => {
         <div className="flex flex-col gap-6 mt-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Welcome User</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Welcome {userName}</h1>
               <p className="text-muted-foreground mt-1">
                 {hasData 
                   ? `Visualize and analyze your 30-day color collection: ${datasetName}`
