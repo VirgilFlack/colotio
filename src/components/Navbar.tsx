@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Menu, Search, Bell, UserCircle, PlusCircle } from 'lucide-react';
+import { Menu, Search, Bell, UserCircle, PlusCircle, Calendar } from 'lucide-react';
 import { 
   Sheet, 
   SheetContent, 
@@ -30,15 +30,16 @@ const Navbar = () => {
                 <nav className="flex flex-col gap-4 mt-8">
                   <Link to="/" className="text-lg font-medium hover:text-accent">Dashboard</Link>
                   <Link to="/data-input" className="text-lg font-medium hover:text-accent">Data Input</Link>
+                  <Link to="/calendar" className="text-lg font-medium hover:text-accent">Calendar</Link>
                 </nav>
               </SheetContent>
             </Sheet>
           )}
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-md bg-gradient-blue-purple flex items-center justify-center">
-              <span className="text-white font-bold text-lg">D</span>
+              <span className="text-white font-bold text-lg">C</span>
             </div>
-            <span className="text-xl font-bold gradient-text hidden sm:inline-block">DataCanvas</span>
+            <span className="text-xl font-bold gradient-text hidden sm:inline-block">Colotio</span>
           </Link>
         </div>
         
@@ -47,7 +48,7 @@ const Navbar = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               className="pl-10 bg-secondary/50"
-              placeholder="Search datasets, visualizations..."
+              placeholder="Search colors, dates..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
             />
@@ -59,6 +60,12 @@ const Navbar = () => {
             <>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/">Dashboard</Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/calendar" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Calendar
+                </Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/data-input" className="flex items-center gap-2">
