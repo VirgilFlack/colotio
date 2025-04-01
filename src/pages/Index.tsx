@@ -33,16 +33,13 @@ const Index = () => {
   const [hasData, setHasData] = useState(false);
   
   useEffect(() => {
-    // Check for user data in localStorage
     const userData = localStorage.getItem('userData');
     
     if (userData) {
       try {
         const parsedData: UserData = JSON.parse(userData);
         
-        // Convert legacy data format if needed
         const processedColorData = parsedData.colorData?.map(item => {
-          // If the data is in the old format with lightColor/darkColor
           if ('lightColor' in item || 'darkColor' in item) {
             if (item.lightColor) {
               return {
@@ -60,8 +57,6 @@ const Index = () => {
               };
             }
           }
-          
-          // Return the item as is if it's already in the new format
           return item;
         });
         
@@ -151,7 +146,7 @@ const Index = () => {
         <div className="flex flex-col gap-6 mt-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Color Data Dashboard</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Welcome User</h1>
               <p className="text-muted-foreground mt-1">
                 {hasData 
                   ? `Visualize and analyze your 30-day color collection: ${datasetName}`
