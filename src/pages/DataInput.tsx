@@ -1,12 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -26,148 +25,98 @@ import {
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Database, ListFilter } from "lucide-react";
+import { Calendar } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Schema for form validation
 const dataSchema = z.object({
   datasetName: z.string().min(2, { message: "Dataset name must be at least 2 characters" }),
-  category: z.string().min(1, { message: "Category is required" }),
   description: z.string().optional(),
-  timeSeriesData: z.array(
+  colorData: z.array(
     z.object({
-      date: z.string(),
-      visitors: z.number().min(0),
-      engagement: z.number().min(0),
-      conversions: z.number().min(0),
+      day: z.number().min(1).max(30),
+      lightColor: z.string().regex(/^#([A-Fa-f0-9]{6})$/, { 
+        message: "Must be a valid hex color code (e.g. #FF5733)" 
+      }),
+      darkColor: z.string().regex(/^#([A-Fa-f0-9]{6})$/, { 
+        message: "Must be a valid hex color code (e.g. #FF5733)" 
+      }),
+      note: z.string().optional(),
     })
-  ).min(1, { message: "At least one data point is required" }),
-  categoryData: z.array(
-    z.object({
-      name: z.string(),
-      sales: z.number().min(0),
-      profit: z.number().min(0),
-      cost: z.number().min(0),
-    })
-  ).min(1, { message: "At least one category is required" }),
-  sourceData: z.array(
-    z.object({
-      name: z.string(),
-      value: z.number().min(0),
-      color: z.string(),
-    })
-  ).min(1, { message: "At least one source is required" }),
+  ).length(30, { message: "Must provide data for all 30 days" }),
 });
 
 type FormData = z.infer<typeof dataSchema>;
 
-const DEFAULT_TIME_SERIES = { date: "", visitors: 0, engagement: 0, conversions: 0 };
-const DEFAULT_CATEGORY = { name: "", sales: 0, profit: 0, cost: 0 };
-const DEFAULT_SOURCE = { name: "", value: 0, color: "#3b82f6" };
-
-// List of predefined colors for source data
-const PREDEFINED_COLORS = [
-  "#3b82f6", // blue
-  "#8b5cf6", // purple
-  "#ec4899", // pink
-  "#10b981", // green
-  "#f59e0b", // amber
-  "#ef4444", // red
-  "#6b7280", // gray
-  "#0ea5e9", // sky
-  "#14b8a6", // teal
-  "#d946ef", // fuchsia
-];
-
 const DataInput = () => {
   const navigate = useNavigate();
-  const [timeSeriesFields, setTimeSeriesFields] = useState([{ ...DEFAULT_TIME_SERIES }]);
-  const [categoryFields, setCategoryFields] = useState([{ ...DEFAULT_CATEGORY }]);
-  const [sourceFields, setSourceFields] = useState([{ ...DEFAULT_SOURCE }]);
+  const [activeTab, setActiveTab] = useState("single-day");
+  const [currentDay, setCurrentDay] = useState(1);
+
+  // Initialize with 30 days of empty color data
+  const initialColorData = Array.from({ length: 30 }, (_, i) => ({
+    day: i + 1,
+    lightColor: "#FFFFFF",
+    darkColor: "#000000",
+    note: "",
+  }));
+  
+  const [colorData, setColorData] = useState(initialColorData);
 
   const form = useForm<FormData>({
     resolver: zodResolver(dataSchema),
     defaultValues: {
       datasetName: "",
-      category: "",
       description: "",
-      timeSeriesData: [{ ...DEFAULT_TIME_SERIES }],
-      categoryData: [{ ...DEFAULT_CATEGORY }],
-      sourceData: [{ ...DEFAULT_SOURCE }],
+      colorData: initialColorData,
     },
   });
+
+  useEffect(() => {
+    // Check if there's existing data in localStorage
+    const userData = localStorage.getItem("userData");
+    if (userData) {
+      try {
+        const parsedData = JSON.parse(userData);
+        if (parsedData.colorData && Array.isArray(parsedData.colorData)) {
+          setColorData(parsedData.colorData);
+          form.setValue("colorData", parsedData.colorData);
+        }
+        if (parsedData.datasetName) {
+          form.setValue("datasetName", parsedData.datasetName);
+        }
+        if (parsedData.description) {
+          form.setValue("description", parsedData.description);
+        }
+      } catch (e) {
+        console.error("Error parsing stored data", e);
+      }
+    }
+  }, [form]);
 
   const onSubmit = (data: FormData) => {
     // Store data in localStorage
     localStorage.setItem("userData", JSON.stringify(data));
-    toast.success("Data saved successfully");
+    toast.success("Color data saved successfully");
     navigate("/"); // Navigate to dashboard
   };
 
-  // Add new field handlers
-  const addTimeSeriesField = () => {
-    setTimeSeriesFields([...timeSeriesFields, { ...DEFAULT_TIME_SERIES }]);
+  // Update color data for a specific day
+  const updateColorData = (day: number, field: string, value: string) => {
+    const updated = [...colorData];
+    updated[day - 1] = { ...updated[day - 1], [field]: value };
+    setColorData(updated);
+    form.setValue("colorData", updated);
   };
 
-  const addCategoryField = () => {
-    setCategoryFields([...categoryFields, { ...DEFAULT_CATEGORY }]);
-  };
-
-  const addSourceField = () => {
-    setSourceFields([
-      ...sourceFields,
-      {
-        ...DEFAULT_SOURCE,
-        color: PREDEFINED_COLORS[sourceFields.length % PREDEFINED_COLORS.length],
-      },
-    ]);
-  };
-
-  // Remove field handlers
-  const removeTimeSeriesField = (index: number) => {
-    if (timeSeriesFields.length > 1) {
-      const updated = [...timeSeriesFields];
-      updated.splice(index, 1);
-      setTimeSeriesFields(updated);
-    }
-  };
-
-  const removeCategoryField = (index: number) => {
-    if (categoryFields.length > 1) {
-      const updated = [...categoryFields];
-      updated.splice(index, 1);
-      setCategoryFields(updated);
-    }
-  };
-
-  const removeSourceField = (index: number) => {
-    if (sourceFields.length > 1) {
-      const updated = [...sourceFields];
-      updated.splice(index, 1);
-      setSourceFields(updated);
-    }
-  };
-
-  // Field update handlers
-  const updateTimeSeriesField = (index: number, field: string, value: string | number) => {
-    const updated = [...timeSeriesFields];
-    updated[index] = { ...updated[index], [field]: field === "date" ? value : Number(value) };
-    setTimeSeriesFields(updated);
-    form.setValue("timeSeriesData", updated as any);
-  };
-
-  const updateCategoryField = (index: number, field: string, value: string | number) => {
-    const updated = [...categoryFields];
-    updated[index] = { ...updated[index], [field]: field === "name" ? value : Number(value) };
-    setCategoryFields(updated);
-    form.setValue("categoryData", updated as any);
-  };
-
-  const updateSourceField = (index: number, field: string, value: string | number) => {
-    const updated = [...sourceFields];
-    updated[index] = { ...updated[index], [field]: value };
-    setSourceFields(updated);
-    form.setValue("sourceData", updated as any);
-  };
+  // Generate a preview swatch
+  const ColorSwatch = ({ color }: { color: string }) => (
+    <div 
+      className="w-6 h-6 rounded-full border border-border" 
+      style={{ backgroundColor: color }}
+    />
+  );
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -175,9 +124,9 @@ const DataInput = () => {
       <main className="container mx-auto px-4 pt-20">
         <div className="flex flex-col gap-6 mt-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Data Input</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Color Data Collection</h1>
             <p className="text-muted-foreground mt-1">
-              Enter your custom data to visualize on the dashboard.
+              Enter your color data for each of the 30 days
             </p>
           </div>
 
@@ -187,7 +136,7 @@ const DataInput = () => {
                 <CardHeader>
                   <CardTitle>Dataset Information</CardTitle>
                   <CardDescription>
-                    Provide basic information about your dataset
+                    Provide basic information about your color collection
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -198,21 +147,7 @@ const DataInput = () => {
                       <FormItem>
                         <FormLabel>Dataset Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="My Dataset" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Business, Marketing, etc." {...field} />
+                          <Input placeholder="My Color Collection" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -227,7 +162,7 @@ const DataInput = () => {
                         <FormLabel>Description</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="A brief description of your dataset"
+                            placeholder="A brief description of your color collection"
                             {...field}
                           />
                         </FormControl>
@@ -241,265 +176,147 @@ const DataInput = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <ListFilter className="h-5 w-5" />
-                    Time Series Data
+                    <Calendar className="h-5 w-5" />
+                    Color Data (30 Days)
                   </CardTitle>
                   <CardDescription>
-                    Enter time-based data points for the line chart
+                    Enter light and dark colors for each day
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {timeSeriesFields.map((field, index) => (
-                      <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-md">
-                        <div className="md:col-span-2">
-                          <Label htmlFor={`date-${index}`}>Date</Label>
-                          <Input
-                            id={`date-${index}`}
-                            placeholder="Jan 1"
-                            value={field.date}
-                            onChange={(e) =>
-                              updateTimeSeriesField(index, "date", e.target.value)
-                            }
-                          />
-                        </div>
+                  <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="mb-4">
+                      <TabsTrigger value="single-day">Day by Day</TabsTrigger>
+                      <TabsTrigger value="all-days">All Days</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="single-day" className="space-y-4">
+                      <div className="flex flex-col gap-6">
                         <div>
-                          <Label htmlFor={`visitors-${index}`}>Visitors</Label>
-                          <Input
-                            id={`visitors-${index}`}
-                            type="number"
-                            placeholder="0"
-                            value={field.visitors}
-                            onChange={(e) =>
-                              updateTimeSeriesField(index, "visitors", e.target.value)
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`engagement-${index}`}>Engagement</Label>
-                          <Input
-                            id={`engagement-${index}`}
-                            type="number"
-                            placeholder="0"
-                            value={field.engagement}
-                            onChange={(e) =>
-                              updateTimeSeriesField(index, "engagement", e.target.value)
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`conversions-${index}`}>Conversions</Label>
-                          <Input
-                            id={`conversions-${index}`}
-                            type="number"
-                            placeholder="0"
-                            value={field.conversions}
-                            onChange={(e) =>
-                              updateTimeSeriesField(index, "conversions", e.target.value)
-                            }
-                          />
-                        </div>
-                        {timeSeriesFields.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="mt-6"
-                            onClick={() => removeTimeSeriesField(index)}
-                          >
-                            Remove
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addTimeSeriesField}
-                  >
-                    Add Time Series Data Point
-                  </Button>
-                </CardFooter>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Database className="h-5 w-5" />
-                    Category Data
-                  </CardTitle>
-                  <CardDescription>
-                    Enter category-based data for the bar chart
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {categoryFields.map((field, index) => (
-                      <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-md">
-                        <div>
-                          <Label htmlFor={`name-${index}`}>Category Name</Label>
-                          <Input
-                            id={`name-${index}`}
-                            placeholder="Electronics"
-                            value={field.name}
-                            onChange={(e) =>
-                              updateCategoryField(index, "name", e.target.value)
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`sales-${index}`}>Sales</Label>
-                          <Input
-                            id={`sales-${index}`}
-                            type="number"
-                            placeholder="0"
-                            value={field.sales}
-                            onChange={(e) =>
-                              updateCategoryField(index, "sales", e.target.value)
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`profit-${index}`}>Profit</Label>
-                          <Input
-                            id={`profit-${index}`}
-                            type="number"
-                            placeholder="0"
-                            value={field.profit}
-                            onChange={(e) =>
-                              updateCategoryField(index, "profit", e.target.value)
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`cost-${index}`}>Cost</Label>
-                          <Input
-                            id={`cost-${index}`}
-                            type="number"
-                            placeholder="0"
-                            value={field.cost}
-                            onChange={(e) =>
-                              updateCategoryField(index, "cost", e.target.value)
-                            }
-                          />
-                        </div>
-                        {categoryFields.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeCategoryField(index)}
-                          >
-                            Remove
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addCategoryField}
-                  >
-                    Add Category
-                  </Button>
-                </CardFooter>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Database className="h-5 w-5" />
-                    Source Data
-                  </CardTitle>
-                  <CardDescription>
-                    Enter source-based data for the pie chart
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {sourceFields.map((field, index) => (
-                      <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-md">
-                        <div>
-                          <Label htmlFor={`source-name-${index}`}>Source Name</Label>
-                          <Input
-                            id={`source-name-${index}`}
-                            placeholder="Direct, Social, etc."
-                            value={field.name}
-                            onChange={(e) =>
-                              updateSourceField(index, "name", e.target.value)
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`value-${index}`}>Value</Label>
-                          <Input
-                            id={`value-${index}`}
-                            type="number"
-                            placeholder="0"
-                            value={field.value}
-                            onChange={(e) =>
-                              updateSourceField(index, "value", e.target.value)
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`color-${index}`}>Color</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              id={`color-${index}`}
-                              type="color"
-                              className="w-16 p-1 h-10"
-                              value={field.color}
-                              onChange={(e) =>
-                                updateSourceField(index, "color", e.target.value)
-                              }
+                          <p className="text-sm text-muted-foreground mb-2">Select day (1-30)</p>
+                          <div className="flex items-center gap-4">
+                            <Slider 
+                              value={[currentDay]} 
+                              min={1} 
+                              max={30} 
+                              step={1} 
+                              onValueChange={(value) => setCurrentDay(value[0])}
+                              className="max-w-md"
                             />
-                            <Input
-                              value={field.color}
-                              onChange={(e) =>
-                                updateSourceField(index, "color", e.target.value)
-                              }
-                              placeholder="#HEX"
-                            />
+                            <span className="font-medium">Day {currentDay}</span>
                           </div>
                         </div>
-                        {sourceFields.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="mt-6"
-                            onClick={() => removeSourceField(index)}
-                          >
-                            Remove
-                          </Button>
-                        )}
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-4">
+                            <FormLabel htmlFor={`light-color-${currentDay}`}>Light Color</FormLabel>
+                            <div className="flex items-center gap-3">
+                              <ColorSwatch color={colorData[currentDay - 1]?.lightColor || "#FFFFFF"} />
+                              <Input
+                                id={`light-color-${currentDay}`}
+                                type="color"
+                                className="w-20 h-10 p-1"
+                                value={colorData[currentDay - 1]?.lightColor || "#FFFFFF"}
+                                onChange={(e) => updateColorData(currentDay, "lightColor", e.target.value)}
+                              />
+                              <Input
+                                value={colorData[currentDay - 1]?.lightColor || "#FFFFFF"}
+                                onChange={(e) => updateColorData(currentDay, "lightColor", e.target.value)}
+                                placeholder="#FFFFFF"
+                                className="flex-1"
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-4">
+                            <FormLabel htmlFor={`dark-color-${currentDay}`}>Dark Color</FormLabel>
+                            <div className="flex items-center gap-3">
+                              <ColorSwatch color={colorData[currentDay - 1]?.darkColor || "#000000"} />
+                              <Input
+                                id={`dark-color-${currentDay}`}
+                                type="color"
+                                className="w-20 h-10 p-1"
+                                value={colorData[currentDay - 1]?.darkColor || "#000000"}
+                                onChange={(e) => updateColorData(currentDay, "darkColor", e.target.value)}
+                              />
+                              <Input
+                                value={colorData[currentDay - 1]?.darkColor || "#000000"}
+                                onChange={(e) => updateColorData(currentDay, "darkColor", e.target.value)}
+                                placeholder="#000000"
+                                className="flex-1"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <FormLabel htmlFor={`note-${currentDay}`}>Note (optional)</FormLabel>
+                          <Input
+                            id={`note-${currentDay}`}
+                            placeholder="Any notes about this day's colors"
+                            value={colorData[currentDay - 1]?.note || ""}
+                            onChange={(e) => updateColorData(currentDay, "note", e.target.value)}
+                          />
+                        </div>
                       </div>
-                    ))}
-                  </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="all-days">
+                      <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                        {colorData.map((day, index) => (
+                          <div key={index} className="p-4 border rounded-md">
+                            <h3 className="text-sm font-medium mb-3">Day {day.day}</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div className="flex items-center gap-2">
+                                <FormLabel className="min-w-16 text-xs">Light:</FormLabel>
+                                <div className="flex items-center gap-2">
+                                  <ColorSwatch color={day.lightColor} />
+                                  <Input
+                                    type="text"
+                                    className="h-8 text-xs"
+                                    value={day.lightColor}
+                                    onChange={(e) => updateColorData(day.day, "lightColor", e.target.value)}
+                                  />
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                <FormLabel className="min-w-16 text-xs">Dark:</FormLabel>
+                                <div className="flex items-center gap-2">
+                                  <ColorSwatch color={day.darkColor} />
+                                  <Input
+                                    type="text"
+                                    className="h-8 text-xs"
+                                    value={day.darkColor}
+                                    onChange={(e) => updateColorData(day.day, "darkColor", e.target.value)}
+                                  />
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                <FormLabel className="min-w-16 text-xs">Note:</FormLabel>
+                                <Input
+                                  type="text"
+                                  className="h-8 text-xs"
+                                  value={day.note || ""}
+                                  onChange={(e) => updateColorData(day.day, "note", e.target.value)}
+                                  placeholder="Note"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
-                <CardFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addSourceField}
-                  >
-                    Add Source
-                  </Button>
-                </CardFooter>
               </Card>
-
+              
               <div className="flex justify-end gap-4">
                 <Button type="button" variant="outline" onClick={() => navigate("/")}>
                   Cancel
                 </Button>
-                <Button type="submit">Save Data & View Dashboard</Button>
+                <Button type="submit">Save Color Data & View Dashboard</Button>
               </div>
             </form>
           </Form>
