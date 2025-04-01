@@ -25,10 +25,18 @@ import {
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Calendar } from "lucide-react";
+import { Calendar, Info } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 // Schema for form validation
 const dataSchema = z.object({
@@ -138,7 +146,182 @@ const DataInput = () => {
       <main className="container mx-auto px-4 pt-20">
         <div className="flex flex-col gap-6 mt-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Color Data Collection</h1>
+            <div className="flex items-center gap-2 mb-1">
+              <h1 className="text-3xl font-bold tracking-tight">Color Data Collection</h1>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full" aria-label="Learn about color theory">
+                    <Info className="h-5 w-5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold">Emotional Color Theory</DialogTitle>
+                    <DialogDescription className="text-base">
+                      Understanding the emotional impact of colors
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    <p className="text-sm text-muted-foreground">
+                      Color theory suggests that different colors evoke different emotional responses. 
+                      Here's what various colors may represent:
+                    </p>
+                    
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                            Red
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="mb-2 text-sm"><span className="font-medium">Positive:</span> Passion, energy, excitement, love, strength</p>
+                          <p className="text-sm"><span className="font-medium">Negative:</span> Anger, danger, warning, aggression</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
+                            Orange
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="mb-2 text-sm"><span className="font-medium">Positive:</span> Creativity, enthusiasm, warmth, success</p>
+                          <p className="text-sm"><span className="font-medium">Negative:</span> Frustration, immaturity, deprivation</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
+                            Yellow
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="mb-2 text-sm"><span className="font-medium">Positive:</span> Optimism, happiness, clarity, joy</p>
+                          <p className="text-sm"><span className="font-medium">Negative:</span> Caution, anxiety, fear, cowardice</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                            Green
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="mb-2 text-sm"><span className="font-medium">Positive:</span> Growth, harmony, health, nature, prosperity</p>
+                          <p className="text-sm"><span className="font-medium">Negative:</span> Envy, materialism, stagnation</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                            Blue
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="mb-2 text-sm"><span className="font-medium">Positive:</span> Trust, calm, serenity, loyalty, stability</p>
+                          <p className="text-sm"><span className="font-medium">Negative:</span> Sadness, depression, coldness</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-purple-600 rounded-full"></div>
+                            Purple
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="mb-2 text-sm"><span className="font-medium">Positive:</span> Creativity, wisdom, spirituality, luxury</p>
+                          <p className="text-sm"><span className="font-medium">Negative:</span> Moodiness, mystery, introversion</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-pink-500 rounded-full"></div>
+                            Pink
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="mb-2 text-sm"><span className="font-medium">Positive:</span> Love, compassion, nurturing, playfulness</p>
+                          <p className="text-sm"><span className="font-medium">Negative:</span> Weakness, over-emotion, immaturity</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-gray-700 rounded-full"></div>
+                            Black
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="mb-2 text-sm"><span className="font-medium">Positive:</span> Sophistication, elegance, power, formality</p>
+                          <p className="text-sm"><span className="font-medium">Negative:</span> Mourning, evil, mystery, fear</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-gray-100 border rounded-full"></div>
+                            White
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="mb-2 text-sm"><span className="font-medium">Positive:</span> Purity, cleanliness, innocence, simplicity</p>
+                          <p className="text-sm"><span className="font-medium">Negative:</span> Sterility, emptiness, isolation</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-gray-500 rounded-full"></div>
+                            Gray
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="mb-2 text-sm"><span className="font-medium">Positive:</span> Neutrality, balance, sophistication</p>
+                          <p className="text-sm"><span className="font-medium">Negative:</span> Boredom, indecision, depression</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-amber-800 rounded-full"></div>
+                            Brown
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="mb-2 text-sm"><span className="font-medium">Positive:</span> Reliability, stability, warmth, earthiness</p>
+                          <p className="text-sm"><span className="font-medium">Negative:</span> Dullness, heaviness, lack of humor</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    <div className="mt-6">
+                      <p className="text-sm text-muted-foreground">
+                        Note: Color associations can vary significantly between cultures and individuals. 
+                        These are general Western interpretations and your personal experience may differ.
+                      </p>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
             <p className="text-muted-foreground mt-1">
               Enter your color data for each of the 30 days
             </p>
