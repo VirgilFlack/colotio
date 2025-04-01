@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Menu, Search, Bell, UserCircle } from 'lucide-react';
+import { Menu, Search, Bell, UserCircle, PlusCircle } from 'lucide-react';
 import { 
   Sheet, 
   SheetContent, 
@@ -9,6 +9,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [searchValue, setSearchValue] = useState('');
@@ -27,20 +28,18 @@ const Navbar = () => {
               </SheetTrigger>
               <SheetContent side="left">
                 <nav className="flex flex-col gap-4 mt-8">
-                  <a href="/" className="text-lg font-medium hover:text-accent">Dashboard</a>
-                  <a href="/visualizations" className="text-lg font-medium hover:text-accent">Visualizations</a>
-                  <a href="/datasets" className="text-lg font-medium hover:text-accent">Datasets</a>
-                  <a href="/templates" className="text-lg font-medium hover:text-accent">Templates</a>
+                  <Link to="/" className="text-lg font-medium hover:text-accent">Dashboard</Link>
+                  <Link to="/data-input" className="text-lg font-medium hover:text-accent">Data Input</Link>
                 </nav>
               </SheetContent>
             </Sheet>
           )}
-          <a href="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-md bg-gradient-blue-purple flex items-center justify-center">
               <span className="text-white font-bold text-lg">D</span>
             </div>
             <span className="text-xl font-bold gradient-text hidden sm:inline-block">DataCanvas</span>
-          </a>
+          </Link>
         </div>
         
         <div className="flex-1 max-w-md mx-4">
@@ -58,9 +57,15 @@ const Navbar = () => {
         <div className="flex items-center gap-2">
           {!isMobile && (
             <>
-              <Button variant="ghost" size="sm">Dashboard</Button>
-              <Button variant="ghost" size="sm">Visualizations</Button>
-              <Button variant="ghost" size="sm">Datasets</Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/">Dashboard</Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/data-input" className="flex items-center gap-2">
+                  <PlusCircle className="h-4 w-4" />
+                  Data Input
+                </Link>
+              </Button>
             </>
           )}
           <Button variant="ghost" size="icon" className="relative">
