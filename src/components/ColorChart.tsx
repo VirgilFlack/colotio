@@ -21,16 +21,16 @@ interface ColorChartProps {
   title: string;
   data: Array<{
     day: number;
-    lightColor: string;
-    darkColor: string;
+    color: string;
+    colorMode: 'light' | 'dark';
     note?: string;
   }>;
   className?: string;
 }
 
 // Custom component to render rectangles with the color data
-const ColorRectangle = (props: RectangleProps) => {
-  const { x, y, width, height, dataKey, fill } = props;
+const ColorRectangle = (props: any) => {
+  const { x, y, width, height, fill } = props;
   
   if (!x || !y || !width || !height || typeof fill !== 'string') return null;
   
@@ -66,8 +66,8 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
   // Transform data for the chart
   const chartData = filteredData.map((item) => ({
     day: `Day ${item.day}`,
-    lightColor: item.lightColor,
-    darkColor: item.darkColor,
+    color: item.color,
+    colorMode: item.colorMode,
     note: item.note || '',
   }));
   
@@ -134,15 +134,9 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
                       return (
                         <div className="p-3 bg-background border rounded-md shadow-md">
                           <p className="font-bold">{data.day}</p>
-                          <div className="grid grid-cols-2 gap-2 mt-2">
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 rounded" style={{ backgroundColor: data.lightColor }}></div>
-                              <span className="text-xs">{data.lightColor}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 rounded" style={{ backgroundColor: data.darkColor }}></div>
-                              <span className="text-xs">{data.darkColor}</span>
-                            </div>
+                          <div className="flex items-center gap-2 mt-2">
+                            <div className="w-4 h-4 rounded" style={{ backgroundColor: data.color }}></div>
+                            <span className="text-xs">{data.color} ({data.colorMode})</span>
                           </div>
                           {data.note && <p className="text-xs mt-2">{data.note}</p>}
                         </div>
@@ -155,30 +149,19 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
                   // Calculate x position for placing the color squares
                   const barWidth = (100 / chartData.length);
                   const xPos = (index * barWidth) + '%';
+                  const yPos = entry.colorMode === 'light' ? "20%" : "55%";
                   
                   return (
                     <g key={`color-${index}`}>
                       <foreignObject 
                         x={`calc(${xPos} + 5%)`} 
-                        y="20%" 
+                        y={yPos}
                         width={`${barWidth * 0.9}%`} 
                         height="25%"
                       >
                         <div 
                           className="w-full h-full rounded-md border border-white/30"
-                          style={{ backgroundColor: entry.lightColor }}
-                        />
-                      </foreignObject>
-                      
-                      <foreignObject 
-                        x={`calc(${xPos} + 5%)`}
-                        y="55%" 
-                        width={`${barWidth * 0.9}%`} 
-                        height="25%"
-                      >
-                        <div 
-                          className="w-full h-full rounded-md border border-white/30"
-                          style={{ backgroundColor: entry.darkColor }}
+                          style={{ backgroundColor: entry.color }}
                         />
                       </foreignObject>
                     </g>

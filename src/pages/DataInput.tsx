@@ -28,6 +28,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Calendar } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 // Schema for form validation
 const dataSchema = z.object({
@@ -36,12 +37,10 @@ const dataSchema = z.object({
   colorData: z.array(
     z.object({
       day: z.number().min(1).max(30),
-      lightColor: z.string().regex(/^#([A-Fa-f0-9]{6})$/, { 
+      color: z.string().regex(/^#([A-Fa-f0-9]{6})$/, { 
         message: "Must be a valid hex color code (e.g. #FF5733)" 
       }),
-      darkColor: z.string().regex(/^#([A-Fa-f0-9]{6})$/, { 
-        message: "Must be a valid hex color code (e.g. #FF5733)" 
-      }),
+      colorMode: z.enum(['light', 'dark']),
       note: z.string().optional(),
     })
   ).length(30, { message: "Must provide data for all 30 days" }),
@@ -57,8 +56,8 @@ const DataInput = () => {
   // Initialize with 30 days of empty color data
   const initialColorData = Array.from({ length: 30 }, (_, i) => ({
     day: i + 1,
-    lightColor: "#FFFFFF",
-    darkColor: "#000000",
+    color: "#CCCCCC",
+    colorMode: 'light' as const,
     note: "",
   }));
   
@@ -80,8 +79,23 @@ const DataInput = () => {
       try {
         const parsedData = JSON.parse(userData);
         if (parsedData.colorData && Array.isArray(parsedData.colorData)) {
-          setColorData(parsedData.colorData);
-          form.setValue("colorData", parsedData.colorData);
+          // Handle potential format change from old format to new format
+          const formattedData = parsedData.colorData.map((item: any) => {
+            // If the data is in old format (with lightColor and darkColor)
+            if (item.lightColor && item.darkColor) {
+              return {
+                day: item.day,
+                color: item.lightColor, // Default to light color
+                colorMode: 'light' as const,
+                note: item.note || '',
+              };
+            }
+            // If the data is already in the new format
+            return item;
+          });
+          
+          setColorData(formattedData);
+          form.setValue("colorData", formattedData);
         }
         if (parsedData.datasetName) {
           form.setValue("datasetName", parsedData.datasetName);
@@ -103,7 +117,7 @@ const DataInput = () => {
   };
 
   // Update color data for a specific day
-  const updateColorData = (day: number, field: string, value: string) => {
+  const updateColorData = (day: number, field: string, value: string | 'light' | 'dark') => {
     const updated = [...colorData];
     updated[day - 1] = { ...updated[day - 1], [field]: value };
     setColorData(updated);
@@ -180,7 +194,7 @@ const DataInput = () => {
                     Color Data (30 Days)
                   </CardTitle>
                   <CardDescription>
-                    Enter light and dark colors for each day
+                    Enter a color and choose light or dark mode for each day
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -207,45 +221,47 @@ const DataInput = () => {
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-6">
                           <div className="space-y-4">
-                            <FormLabel htmlFor={`light-color-${currentDay}`}>Light Color</FormLabel>
+                            <FormLabel htmlFor={`color-${currentDay}`}>Color</FormLabel>
                             <div className="flex items-center gap-3">
-                              <ColorSwatch color={colorData[currentDay - 1]?.lightColor || "#FFFFFF"} />
+                              <ColorSwatch color={colorData[currentDay - 1]?.color || "#CCCCCC"} />
                               <Input
-                                id={`light-color-${currentDay}`}
+                                id={`color-${currentDay}`}
                                 type="color"
                                 className="w-20 h-10 p-1"
-                                value={colorData[currentDay - 1]?.lightColor || "#FFFFFF"}
-                                onChange={(e) => updateColorData(currentDay, "lightColor", e.target.value)}
+                                value={colorData[currentDay - 1]?.color || "#CCCCCC"}
+                                onChange={(e) => updateColorData(currentDay, "color", e.target.value)}
                               />
                               <Input
-                                value={colorData[currentDay - 1]?.lightColor || "#FFFFFF"}
-                                onChange={(e) => updateColorData(currentDay, "lightColor", e.target.value)}
-                                placeholder="#FFFFFF"
+                                value={colorData[currentDay - 1]?.color || "#CCCCCC"}
+                                onChange={(e) => updateColorData(currentDay, "color", e.target.value)}
+                                placeholder="#CCCCCC"
                                 className="flex-1"
                               />
                             </div>
                           </div>
                           
-                          <div className="space-y-4">
-                            <FormLabel htmlFor={`dark-color-${currentDay}`}>Dark Color</FormLabel>
-                            <div className="flex items-center gap-3">
-                              <ColorSwatch color={colorData[currentDay - 1]?.darkColor || "#000000"} />
-                              <Input
-                                id={`dark-color-${currentDay}`}
-                                type="color"
-                                className="w-20 h-10 p-1"
-                                value={colorData[currentDay - 1]?.darkColor || "#000000"}
-                                onChange={(e) => updateColorData(currentDay, "darkColor", e.target.value)}
-                              />
-                              <Input
-                                value={colorData[currentDay - 1]?.darkColor || "#000000"}
-                                onChange={(e) => updateColorData(currentDay, "darkColor", e.target.value)}
-                                placeholder="#000000"
-                                className="flex-1"
-                              />
-                            </div>
+                          <div className="space-y-2">
+                            <FormLabel>Color Mode</FormLabel>
+                            <RadioGroup 
+                              value={colorData[currentDay - 1]?.colorMode || "light"}
+                              onValueChange={(value) => updateColorData(
+                                currentDay, 
+                                "colorMode", 
+                                value as 'light' | 'dark'
+                              )}
+                              className="flex space-x-4"
+                            >
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="light" id="light" />
+                                <FormLabel htmlFor="light" className="font-normal">Light</FormLabel>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="dark" id="dark" />
+                                <FormLabel htmlFor="dark" className="font-normal">Dark</FormLabel>
+                              </div>
+                            </RadioGroup>
                           </div>
                         </div>
                         
@@ -268,28 +284,39 @@ const DataInput = () => {
                             <h3 className="text-sm font-medium mb-3">Day {day.day}</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                               <div className="flex items-center gap-2">
-                                <FormLabel className="min-w-16 text-xs">Light:</FormLabel>
+                                <FormLabel className="min-w-16 text-xs">Color:</FormLabel>
                                 <div className="flex items-center gap-2">
-                                  <ColorSwatch color={day.lightColor} />
+                                  <ColorSwatch color={day.color} />
                                   <Input
                                     type="text"
                                     className="h-8 text-xs"
-                                    value={day.lightColor}
-                                    onChange={(e) => updateColorData(day.day, "lightColor", e.target.value)}
+                                    value={day.color}
+                                    onChange={(e) => updateColorData(day.day, "color", e.target.value)}
                                   />
                                 </div>
                               </div>
                               
                               <div className="flex items-center gap-2">
-                                <FormLabel className="min-w-16 text-xs">Dark:</FormLabel>
+                                <FormLabel className="min-w-16 text-xs">Mode:</FormLabel>
                                 <div className="flex items-center gap-2">
-                                  <ColorSwatch color={day.darkColor} />
-                                  <Input
-                                    type="text"
-                                    className="h-8 text-xs"
-                                    value={day.darkColor}
-                                    onChange={(e) => updateColorData(day.day, "darkColor", e.target.value)}
-                                  />
+                                  <RadioGroup 
+                                    value={day.colorMode}
+                                    onValueChange={(value) => updateColorData(
+                                      day.day, 
+                                      "colorMode", 
+                                      value as 'light' | 'dark'
+                                    )}
+                                    className="flex space-x-4"
+                                  >
+                                    <div className="flex items-center space-x-2">
+                                      <RadioGroupItem value="light" id={`light-${day.day}`} />
+                                      <FormLabel htmlFor={`light-${day.day}`} className="text-xs font-normal">Light</FormLabel>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <RadioGroupItem value="dark" id={`dark-${day.day}`} />
+                                      <FormLabel htmlFor={`dark-${day.day}`} className="text-xs font-normal">Dark</FormLabel>
+                                    </div>
+                                  </RadioGroup>
                                 </div>
                               </div>
                               
