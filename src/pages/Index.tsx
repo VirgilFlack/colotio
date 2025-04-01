@@ -24,6 +24,20 @@ interface UserData {
   colorData: ColorData[];
 }
 
+// Array of positive messages to display randomly
+const positiveMessages = [
+  "Today is a great day to explore colors!",
+  "Your color choices reflect your unique perspective.",
+  "Feeling creative? Let's explore your palette!",
+  "Colors can change your mood. Make today bright!",
+  "Every color tells a story. What's yours?",
+  "Your color journey is looking fantastic!",
+  "Embrace the colorful moments in life.",
+  "Ready to add some color to your day?",
+  "Your color choices are as unique as you are!",
+  "Explore the power of colors in your everyday life."
+];
+
 const Index = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const navigate = useNavigate();
@@ -33,6 +47,7 @@ const Index = () => {
   const [description, setDescription] = useState<string>('');
   const [hasData, setHasData] = useState(false);
   const [userName, setUserName] = useState('User');
+  const [positiveMessage, setPositiveMessage] = useState('');
   
   useEffect(() => {
     // Get user name from localStorage
@@ -40,6 +55,10 @@ const Index = () => {
     if (storedName) {
       setUserName(storedName);
     }
+
+    // Set a random positive message
+    const randomIndex = Math.floor(Math.random() * positiveMessages.length);
+    setPositiveMessage(positiveMessages[randomIndex]);
 
     const userData = localStorage.getItem('userData');
     
@@ -156,9 +175,7 @@ const Index = () => {
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Welcome {userName}</h1>
               <p className="text-muted-foreground mt-1">
-                {hasData 
-                  ? `Visualize and analyze your 30-day color collection: ${datasetName}`
-                  : 'Collect and visualize your daily color choices'}
+                {positiveMessage}
               </p>
               {description && hasData && (
                 <p className="text-sm mt-2 italic">{description}</p>
