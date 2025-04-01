@@ -61,6 +61,11 @@ const DataInput = () => {
   const [activeTab, setActiveTab] = useState("single-day");
   const [currentDay, setCurrentDay] = useState(1);
 
+  // Get the current month name
+  const currentMonthName = new Date().toLocaleString('default', { month: 'long' });
+  const currentYear = new Date().getFullYear();
+  const defaultDatasetName = `${currentMonthName} ${currentYear}`;
+
   // Initialize with 30 days of empty color data
   const initialColorData = Array.from({ length: 30 }, (_, i) => ({
     day: i + 1,
@@ -74,7 +79,7 @@ const DataInput = () => {
   const form = useForm<FormData>({
     resolver: zodResolver(dataSchema),
     defaultValues: {
-      datasetName: "",
+      datasetName: defaultDatasetName,
       description: "",
       colorData: initialColorData,
     },
@@ -105,9 +110,8 @@ const DataInput = () => {
           setColorData(formattedData);
           form.setValue("colorData", formattedData);
         }
-        if (parsedData.datasetName) {
-          form.setValue("datasetName", parsedData.datasetName);
-        }
+        // We're not loading the saved dataset name anymore, but always using the current month
+        form.setValue("datasetName", defaultDatasetName);
         if (parsedData.description) {
           form.setValue("description", parsedData.description);
         }
@@ -115,9 +119,12 @@ const DataInput = () => {
         console.error("Error parsing stored data", e);
       }
     }
-  }, [form]);
+  }, [form, defaultDatasetName]);
 
   const onSubmit = (data: FormData) => {
+    // Always ensure the dataset name is the current month before saving
+    data.datasetName = defaultDatasetName;
+    
     // Store data in localStorage
     localStorage.setItem("userData", JSON.stringify(data));
     toast.success("Color data saved successfully");
@@ -333,7 +340,7 @@ const DataInput = () => {
                 <CardHeader>
                   <CardTitle>Dataset Information</CardTitle>
                   <CardDescription>
-                    Provide basic information about your color collection
+                    Dataset automatically named after the current month
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -344,7 +351,12 @@ const DataInput = () => {
                       <FormItem>
                         <FormLabel>Dataset Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="My Color Collection" {...field} />
+                          <Input 
+                            placeholder={defaultDatasetName} 
+                            {...field} 
+                            disabled
+                            value={defaultDatasetName}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
