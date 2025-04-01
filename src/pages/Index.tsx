@@ -12,9 +12,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ColorData {
   day: number;
-  lightColor: string;
-  darkColor: string;
+  color: string;
+  colorMode: 'light' | 'dark';
   note?: string;
+  lightColor?: string;
+  darkColor?: string;
 }
 
 interface UserData {
@@ -39,10 +41,36 @@ const Index = () => {
     if (userData) {
       try {
         const parsedData: UserData = JSON.parse(userData);
-        setColorData(parsedData.colorData || []);
+        
+        // Convert legacy data format if needed
+        const processedColorData = parsedData.colorData?.map(item => {
+          // If the data is in the old format with lightColor/darkColor
+          if ('lightColor' in item || 'darkColor' in item) {
+            if (item.lightColor) {
+              return {
+                day: item.day,
+                color: item.lightColor,
+                colorMode: 'light' as const,
+                note: item.note
+              };
+            } else if (item.darkColor) {
+              return {
+                day: item.day,
+                color: item.darkColor,
+                colorMode: 'dark' as const,
+                note: item.note
+              };
+            }
+          }
+          
+          // Return the item as is if it's already in the new format
+          return item;
+        });
+        
+        setColorData(processedColorData || []);
         setDatasetName(parsedData.datasetName || '');
         setDescription(parsedData.description || '');
-        setHasData(Boolean(parsedData.colorData?.length));
+        setHasData(Boolean(processedColorData?.length));
       } catch (e) {
         console.error('Error parsing stored data', e);
       }
@@ -62,19 +90,20 @@ const Index = () => {
   
   // Get color stats
   const getUniqueColorCount = (type: 'light' | 'dark') => {
-    const colorKey = type === 'light' ? 'lightColor' : 'darkColor';
-    const uniqueColors = new Set(colorData.map(item => item[colorKey]));
+    const uniqueColors = new Set(colorData
+      .filter(item => item.colorMode === type)
+      .map(item => item.color)
+    );
     return uniqueColors.size;
   };
   
   // Get most common color
   const getMostCommonColor = (type: 'light' | 'dark') => {
-    const colorKey = type === 'light' ? 'lightColor' : 'darkColor';
+    const filteredColors = colorData.filter(item => item.colorMode === type);
     const colorCounts: Record<string, number> = {};
     
-    colorData.forEach(item => {
-      const color = item[colorKey];
-      colorCounts[color] = (colorCounts[color] || 0) + 1;
+    filteredColors.forEach(item => {
+      colorCounts[item.color] = (colorCounts[item.color] || 0) + 1;
     });
     
     let mostCommon = '';
@@ -91,26 +120,15 @@ const Index = () => {
   };
   
   const renderColorPalettes = () => {
-    // Group colors by pairs (light and dark)
-    const colorPairs = colorData.map(item => ({
-      day: item.day,
-      lightColor: item.lightColor,
-      darkColor: item.darkColor,
-      note: item.note
-    }));
-    
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {colorPairs.map(pair => (
-          <div key={pair.day} className="border rounded-md overflow-hidden">
-            <div className="flex flex-col h-32">
-              <div className="h-1/2" style={{ backgroundColor: pair.lightColor }}></div>
-              <div className="h-1/2" style={{ backgroundColor: pair.darkColor }}></div>
-            </div>
+        {colorData.map((item, index) => (
+          <div key={index} className="border rounded-md overflow-hidden">
+            <div className="h-32" style={{ backgroundColor: item.color }}></div>
             <div className="p-2 text-center">
-              <p className="text-sm font-medium">Day {pair.day}</p>
-              <p className="text-xs text-muted-foreground">{pair.lightColor} + {pair.darkColor}</p>
-              {pair.note && <p className="text-xs italic mt-1">{pair.note}</p>}
+              <p className="text-sm font-medium">Day {item.day}</p>
+              <p className="text-xs text-muted-foreground">{item.color} ({item.colorMode})</p>
+              {item.note && <p className="text-xs italic mt-1">{item.note}</p>}
             </div>
           </div>
         ))}
@@ -154,7 +172,7 @@ const Index = () => {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatsCard
-                  title="Color Pairs"
+                  title="Color Entries"
                   value={colorData.length}
                   icon={<Calendar className="h-5 w-5" />}
                   className="animate-fade-in"
@@ -203,12 +221,12 @@ const Index = () => {
                       </CardHeader>
                       <CardContent>
                         <div className="flex flex-wrap gap-2">
-                          {colorData.map((item, index) => (
+                          {colorData.filter(item => item.colorMode === 'light').map((item, index) => (
                             <div 
                               key={index} 
                               className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
-                              style={{ backgroundColor: item.lightColor }}
-                              title={`Day ${item.day}: ${item.lightColor}`}
+                              style={{ backgroundColor: item.color }}
+                              title={`Day ${item.day}: ${item.color}`}
                             />
                           ))}
                         </div>
@@ -221,12 +239,12 @@ const Index = () => {
                       </CardHeader>
                       <CardContent>
                         <div className="flex flex-wrap gap-2">
-                          {colorData.map((item, index) => (
+                          {colorData.filter(item => item.colorMode === 'dark').map((item, index) => (
                             <div 
                               key={index} 
                               className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
-                              style={{ backgroundColor: item.darkColor }}
-                              title={`Day ${item.day}: ${item.darkColor}`}
+                              style={{ backgroundColor: item.color }}
+                              title={`Day ${item.day}: ${item.color}`}
                             />
                           ))}
                         </div>
@@ -241,25 +259,22 @@ const Index = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {colorData.map((item, index) => (
                         <Card key={index} className="overflow-hidden">
-                          <div className="h-24 flex">
-                            <div className="w-1/2" style={{backgroundColor: item.lightColor}}></div>
-                            <div className="w-1/2" style={{backgroundColor: item.darkColor}}></div>
-                          </div>
+                          <div className="h-24" style={{backgroundColor: item.color}}></div>
                           <CardContent className="p-4">
                             <h3 className="font-semibold">Day {item.day}</h3>
-                            <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                            <div className="mt-2 text-xs">
                               <div>
-                                <span className="text-muted-foreground">Light: </span>
-                                {item.lightColor}
+                                <span className="text-muted-foreground">Color: </span>
+                                {item.color}
                               </div>
                               <div>
-                                <span className="text-muted-foreground">Dark: </span>
-                                {item.darkColor}
+                                <span className="text-muted-foreground">Mode: </span>
+                                {item.colorMode}
                               </div>
+                              {item.note && (
+                                <p className="text-xs mt-2 italic">{item.note}</p>
+                              )}
                             </div>
-                            {item.note && (
-                              <p className="text-xs mt-2 italic">{item.note}</p>
-                            )}
                           </CardContent>
                         </Card>
                       ))}

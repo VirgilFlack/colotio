@@ -12,7 +12,6 @@ import {
   YAxis, 
   Tooltip, 
   Rectangle,
-  RectangleProps,
   ComposedChart,
   ResponsiveContainer 
 } from 'recharts';
@@ -21,6 +20,8 @@ interface ColorChartProps {
   title: string;
   data: Array<{
     day: number;
+    lightColor?: string;
+    darkColor?: string;
     color: string;
     colorMode: 'light' | 'dark';
     note?: string;
