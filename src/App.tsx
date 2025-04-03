@@ -9,7 +9,8 @@ import Index from "./pages/Index";
 import DataInput from "./pages/DataInput";
 import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
-import Welcome from "./pages/Welcome"; // Import the new Welcome component
+import Welcome from "./pages/Welcome";
+import Account from "./pages/Account"; // Import the new Account component
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => {
               <Route path="/dashboard" element={<Index />} />
               <Route path="/data-input" element={<DataInput />} />
               <Route path="/calendar" element={<Calendar />} />
+              <Route path="/account" element={<Account />} /> {/* Add new Account route */}
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -9,12 +9,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [searchValue, setSearchValue] = useState('');
   const [userName, setUserName] = useState('');
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedName = localStorage.getItem('userName');
@@ -22,6 +23,10 @@ const Navbar = () => {
       setUserName(storedName);
     }
   }, []);
+
+  const handleUserButtonClick = () => {
+    navigate('/account');
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-md border-b border-border z-50">
@@ -39,6 +44,7 @@ const Navbar = () => {
                   <Link to="/dashboard" className="text-lg font-medium hover:text-accent">Dashboard</Link>
                   <Link to="/data-input" className="text-lg font-medium hover:text-accent">Data Input</Link>
                   <Link to="/calendar" className="text-lg font-medium hover:text-accent">Calendar</Link>
+                  <Link to="/account" className="text-lg font-medium hover:text-accent">Account</Link>
                 </nav>
               </SheetContent>
             </Sheet>
@@ -87,7 +93,11 @@ const Navbar = () => {
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full"></span>
           </Button>
-          <Button variant="ghost" className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            className="flex items-center gap-2"
+            onClick={handleUserButtonClick}
+          >
             <UserCircle className="h-5 w-5" />
             {userName && <span className="text-sm hidden sm:inline-block">{userName}</span>}
           </Button>
