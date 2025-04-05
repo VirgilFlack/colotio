@@ -37,6 +37,25 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Define the allowed colors
+const ALLOWED_COLORS = {
+  Red: "#FF0000",
+  Blue: "#0000FF",
+  Yellow: "#FFFF00", 
+  Green: "#00FF00",
+  Purple: "#800080",
+  Orange: "#FFA500",
+  Black: "#000000",
+  White: "#FFFFFF"
+};
 
 // Schema for form validation
 const dataSchema = z.object({
@@ -45,9 +64,7 @@ const dataSchema = z.object({
   colorData: z.array(
     z.object({
       day: z.number().min(1).max(30),
-      color: z.string().regex(/^#([A-Fa-f0-9]{6})$/, { 
-        message: "Must be a valid hex color code (e.g. #FF5733)" 
-      }),
+      color: z.string(),
       colorMode: z.enum(['light', 'dark']),
       note: z.string().optional(),
     })
@@ -69,7 +86,7 @@ const DataInput = () => {
   // Initialize with 30 days of empty color data
   const initialColorData = Array.from({ length: 30 }, (_, i) => ({
     day: i + 1,
-    color: "#CCCCCC",
+    color: ALLOWED_COLORS.Blue, // Default to blue
     colorMode: 'light' as const,
     note: "",
   }));
@@ -137,6 +154,12 @@ const DataInput = () => {
     updated[day - 1] = { ...updated[day - 1], [field]: value };
     setColorData(updated);
     form.setValue("colorData", updated);
+  };
+
+  // Get color name from hex value
+  const getColorNameFromHex = (hexValue: string) => {
+    const entry = Object.entries(ALLOWED_COLORS).find(([_, hex]) => hex === hexValue);
+    return entry ? entry[0] : 'Unknown';
   };
 
   // Generate a preview swatch
@@ -389,7 +412,7 @@ const DataInput = () => {
                     Color Data (30 Days)
                   </CardTitle>
                   <CardDescription>
-                    Enter a color and choose light or dark mode for each day
+                    Select a color and choose light or dark mode for each day
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -420,20 +443,28 @@ const DataInput = () => {
                           <div className="space-y-4">
                             <FormLabel htmlFor={`color-${currentDay}`}>Color</FormLabel>
                             <div className="flex items-center gap-3">
-                              <ColorSwatch color={colorData[currentDay - 1]?.color || "#CCCCCC"} />
-                              <Input
-                                id={`color-${currentDay}`}
-                                type="color"
-                                className="w-20 h-10 p-1"
-                                value={colorData[currentDay - 1]?.color || "#CCCCCC"}
-                                onChange={(e) => updateColorData(currentDay, "color", e.target.value)}
-                              />
-                              <Input
-                                value={colorData[currentDay - 1]?.color || "#CCCCCC"}
-                                onChange={(e) => updateColorData(currentDay, "color", e.target.value)}
-                                placeholder="#CCCCCC"
-                                className="flex-1"
-                              />
+                              <ColorSwatch color={colorData[currentDay - 1]?.color || "#0000FF"} />
+                              <Select
+                                value={getColorNameFromHex(colorData[currentDay - 1]?.color) || "Blue"}
+                                onValueChange={(value) => updateColorData(currentDay, "color", ALLOWED_COLORS[value as keyof typeof ALLOWED_COLORS])}
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Select a color" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {Object.entries(ALLOWED_COLORS).map(([name, hex]) => (
+                                    <SelectItem key={name} value={name}>
+                                      <div className="flex items-center gap-2">
+                                        <div 
+                                          className="w-4 h-4 rounded-full" 
+                                          style={{ backgroundColor: hex }}
+                                        ></div>
+                                        <span>{name}</span>
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
                           </div>
                           
@@ -482,12 +513,27 @@ const DataInput = () => {
                                 <FormLabel className="min-w-16 text-xs">Color:</FormLabel>
                                 <div className="flex items-center gap-2">
                                   <ColorSwatch color={day.color} />
-                                  <Input
-                                    type="text"
-                                    className="h-8 text-xs"
-                                    value={day.color}
-                                    onChange={(e) => updateColorData(day.day, "color", e.target.value)}
-                                  />
+                                  <Select
+                                    value={getColorNameFromHex(day.color) || "Blue"}
+                                    onValueChange={(value) => updateColorData(day.day, "color", ALLOWED_COLORS[value as keyof typeof ALLOWED_COLORS])}
+                                  >
+                                    <SelectTrigger className="h-8 text-xs">
+                                      <SelectValue placeholder="Select a color" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {Object.entries(ALLOWED_COLORS).map(([name, hex]) => (
+                                        <SelectItem key={name} value={name}>
+                                          <div className="flex items-center gap-2">
+                                            <div 
+                                              className="w-3 h-3 rounded-full" 
+                                              style={{ backgroundColor: hex }}
+                                            ></div>
+                                            <span>{name}</span>
+                                          </div>
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
                                 </div>
                               </div>
                               
