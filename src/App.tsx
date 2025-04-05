@@ -1,5 +1,5 @@
 
-import React from "react"; // Adding explicit React import
+import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,7 +10,8 @@ import DataInput from "./pages/DataInput";
 import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
 import Welcome from "./pages/Welcome";
-import Account from "./pages/Account"; // Import the new Account component
+import Account from "./pages/Account";
+import Help from "./pages/Help"; // Import the new Help component
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -26,7 +27,8 @@ const App = () => {
               <Route path="/dashboard" element={<Index />} />
               <Route path="/data-input" element={<DataInput />} />
               <Route path="/calendar" element={<Calendar />} />
-              <Route path="/account" element={<Account />} /> {/* Add new Account route */}
+              <Route path="/account" element={<Account />} />
+              <Route path="/help" element={<Help />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import ColorChart from '@/components/ColorChart';
-import { PlusCircle, BarChart, Calendar } from 'lucide-react';
+import { PlusCircle, Calendar, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,7 +58,6 @@ const Index = () => {
     loadColorData();
   }, []);
 
-  // Function to load color data from localStorage
   const loadColorData = () => {
     const userData = localStorage.getItem('userData');
     
@@ -100,7 +98,6 @@ const Index = () => {
         setHasData(false);
       }
     } else {
-      // No data found, reset state
       setColorData([]);
       setDatasetName('');
       setDescription('');
@@ -108,9 +105,7 @@ const Index = () => {
     }
   };
   
-  // Add event listener for storage changes
   useEffect(() => {
-    // Listen for storage events (when data is changed in another tab)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'userData' || e.key === null || e.key.includes('color') || e.key.includes('Color')) {
         loadColorData();
@@ -119,7 +114,6 @@ const Index = () => {
 
     window.addEventListener('storage', handleStorageChange);
     
-    // Add a custom event for same-tab updates
     const handleDataErased = () => {
       loadColorData();
     };
@@ -146,11 +140,8 @@ const Index = () => {
     navigate('/calendar');
   };
   
-  const goToAnalytics = () => {
-    toast.info("Analytics page coming soon!", {
-      description: "This feature is under development.",
-      duration: 3000,
-    });
+  const goToHelp = () => {
+    navigate('/help');
   };
   
   return (
@@ -214,15 +205,15 @@ const Index = () => {
               
               <Card 
                 className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in [animation-delay:200ms]"
-                onClick={goToAnalytics}
+                onClick={goToHelp}
               >
                 <div className="flex flex-col items-center justify-center h-full space-y-4 p-6">
                   <div className="p-4 rounded-full bg-primary/10">
-                    <BarChart className="h-12 w-12 text-primary" />
+                    <HelpCircle className="h-12 w-12 text-primary" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold mb-2">Analytics</h2>
-                    <p className="text-muted-foreground">View detailed analytics of your color data</p>
+                    <h2 className="text-xl font-bold mb-2">Help</h2>
+                    <p className="text-muted-foreground">Get assistance and learn how to use the app</p>
                   </div>
                 </div>
               </Card>
