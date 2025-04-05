@@ -56,6 +56,11 @@ const Index = () => {
     const randomIndex = Math.floor(Math.random() * positiveMessages.length);
     setPositiveMessage(positiveMessages[randomIndex]);
 
+    loadColorData();
+  }, []);
+
+  // Function to load color data from localStorage
+  const loadColorData = () => {
     const userData = localStorage.getItem('userData');
     
     if (userData) {
@@ -89,8 +94,41 @@ const Index = () => {
         setHasData(Boolean(processedColorData?.length));
       } catch (e) {
         console.error('Error parsing stored data', e);
+        setColorData([]);
+        setDatasetName('');
+        setDescription('');
+        setHasData(false);
       }
+    } else {
+      // No data found, reset state
+      setColorData([]);
+      setDatasetName('');
+      setDescription('');
+      setHasData(false);
     }
+  };
+  
+  // Add event listener for storage changes
+  useEffect(() => {
+    // Listen for storage events (when data is changed in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'userData' || e.key === null || e.key.includes('color') || e.key.includes('Color')) {
+        loadColorData();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Add a custom event for same-tab updates
+    const handleDataErased = () => {
+      loadColorData();
+    };
+    window.addEventListener('colorDataErased', handleDataErased);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('colorDataErased', handleDataErased);
+    };
   }, []);
   
   const handleGenerateReport = () => {

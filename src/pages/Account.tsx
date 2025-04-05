@@ -54,9 +54,15 @@ const Account = () => {
         }
       });
       
+      // Remove main userData
+      localStorage.removeItem('userData');
+      
       toast.success('All color data has been erased');
       setShowDeleteDialog(false);
       setDeleteConfirmation('');
+      
+      // Dispatch a custom event to notify the dashboard
+      window.dispatchEvent(new Event('colorDataErased'));
       
       // Redirect to dashboard to refresh the view
       navigate('/dashboard');
