@@ -1,13 +1,14 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import ColorChart from '@/components/ColorChart';
-import ColorCalendarWidget from '@/components/ColorCalendarWidget';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, PlusCircle, BarChart, LineChart } from 'lucide-react';
+import { PlusCircle, BarChart, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ColorData {
   day: number;
@@ -146,10 +147,10 @@ const Index = () => {
   };
   
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
       
-      <main className="container mx-auto px-4 pt-20">
+      <main className="container mx-auto px-4 pt-20 pb-16 max-w-7xl">
         <div className="flex flex-col gap-6 mt-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="max-w-full">
@@ -158,7 +159,7 @@ const Index = () => {
                 {positiveMessage}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-shrink-0">
               <Button onClick={goToDataInput} variant="outline" className="gap-2">
                 <PlusCircle className="h-4 w-4" />
                 {hasData ? 'Edit Colors' : 'Add Colors'}
@@ -221,7 +222,7 @@ const Index = () => {
           
           {hasData ? (
             <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <TabsList>
+              <TabsList className="w-full sm:w-auto overflow-x-auto scrollbar-thin flex flex-nowrap">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="timeline">Timeline</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -238,16 +239,18 @@ const Index = () => {
                       <CardTitle className="text-lg">Light Colors Timeline</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex flex-wrap gap-2">
-                        {colorData.filter(item => item.colorMode === 'light').map((item, index) => (
-                          <div 
-                            key={index} 
-                            className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
-                            style={{ backgroundColor: item.color }}
-                            title={`Day ${item.day}: ${item.color}`}
-                          />
-                        ))}
-                      </div>
+                      <ScrollArea className="h-full max-h-48">
+                        <div className="flex flex-wrap gap-2">
+                          {colorData.filter(item => item.colorMode === 'light').map((item, index) => (
+                            <div 
+                              key={index} 
+                              className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
+                              style={{ backgroundColor: item.color }}
+                              title={`Day ${item.day}: ${item.color}`}
+                            />
+                          ))}
+                        </div>
+                      </ScrollArea>
                     </CardContent>
                   </Card>
                   
@@ -256,16 +259,18 @@ const Index = () => {
                       <CardTitle className="text-lg">Dark Colors Timeline</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex flex-wrap gap-2">
-                        {colorData.filter(item => item.colorMode === 'dark').map((item, index) => (
-                          <div 
-                            key={index} 
-                            className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
-                            style={{ backgroundColor: item.color }}
-                            title={`Day ${item.day}: ${item.color}`}
-                          />
-                        ))}
-                      </div>
+                      <ScrollArea className="h-full max-h-48">
+                        <div className="flex flex-wrap gap-2">
+                          {colorData.filter(item => item.colorMode === 'dark').map((item, index) => (
+                            <div 
+                              key={index} 
+                              className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
+                              style={{ backgroundColor: item.color }}
+                              title={`Day ${item.day}: ${item.color}`}
+                            />
+                          ))}
+                        </div>
+                      </ScrollArea>
                     </CardContent>
                   </Card>
                 </div>
@@ -274,29 +279,31 @@ const Index = () => {
               <TabsContent value="timeline">
                 <div className="space-y-4">
                   <h2 className="text-xl font-bold">30-Day Color Timeline</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {colorData.map((item, index) => (
-                      <Card key={index} className="overflow-hidden">
-                        <div className="h-24" style={{backgroundColor: item.color}}></div>
-                        <CardContent className="p-4">
-                          <h3 className="font-semibold">Day {item.day}</h3>
-                          <div className="mt-2 text-xs">
-                            <div>
-                              <span className="text-muted-foreground">Color: </span>
-                              {item.color}
+                  <ScrollArea className="max-h-[calc(100vh-300px)]">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+                      {colorData.map((item, index) => (
+                        <Card key={index} className="overflow-hidden">
+                          <div className="h-24" style={{backgroundColor: item.color}}></div>
+                          <CardContent className="p-4">
+                            <h3 className="font-semibold">Day {item.day}</h3>
+                            <div className="mt-2 text-xs">
+                              <div>
+                                <span className="text-muted-foreground">Color: </span>
+                                {item.color}
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Mode: </span>
+                                {item.colorMode}
+                              </div>
+                              {item.note && (
+                                <p className="text-xs mt-2 italic">{item.note}</p>
+                              )}
                             </div>
-                            <div>
-                              <span className="text-muted-foreground">Mode: </span>
-                              {item.colorMode}
-                            </div>
-                            {item.note && (
-                              <p className="text-xs mt-2 italic">{item.note}</p>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </div>
               </TabsContent>
               
