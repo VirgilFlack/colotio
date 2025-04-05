@@ -7,14 +7,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  Rectangle,
-  ComposedChart,
-  ResponsiveContainer 
-} from 'recharts';
+import { format, addDays, startOfMonth, getDaysInMonth } from 'date-fns';
+import { CalendarDays } from 'lucide-react';
 
 interface ColorChartProps {
   title: string;
@@ -28,26 +22,6 @@ interface ColorChartProps {
   }>;
   className?: string;
 }
-
-// Custom component to render rectangles with the color data
-const ColorRectangle = (props: any) => {
-  const { x, y, width, height, fill } = props;
-  
-  if (!x || !y || !width || !height || typeof fill !== 'string') return null;
-  
-  return (
-    <Rectangle 
-      x={x} 
-      y={y} 
-      width={width} 
-      height={height} 
-      fill={fill} 
-      stroke="#fff"
-      strokeWidth={1}
-      radius={2}
-    />
-  );
-};
 
 const ColorChart = ({ title, data, className }: ColorChartProps) => {
   const [viewMode, setViewMode] = useState<'all' | '7d' | '15d'>('7d');
@@ -64,19 +38,32 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
   
   const filteredData = getFilteredData();
   
-  // Transform data for the chart
-  const chartData = filteredData.map((item) => ({
-    day: `Day ${item.day}`,
-    color: item.color,
-    colorMode: item.colorMode,
-    note: item.note || '',
-  }));
+  // Get current month data for calendar view
+  const currentDate = new Date();
+  const startOfCurrentMonth = startOfMonth(currentDate);
+  const daysInMonth = getDaysInMonth(currentDate);
+  const firstDayOfMonth = startOfCurrentMonth.getDay(); // 0 for Sunday, 1 for Monday, etc.
   
-  // Custom chart config
-  const chartConfig = {
-    light: { color: "#F0F4F8" },
-    dark: { color: "#1F2937" },
+  // Create calendar grid
+  const calendarDays = [];
+  
+  // Add empty cells for days before the 1st of the month
+  for (let i = 0; i < firstDayOfMonth; i++) {
+    calendarDays.push(null);
+  }
+  
+  // Add days of the month
+  for (let i = 1; i <= daysInMonth; i++) {
+    calendarDays.push(i);
+  }
+  
+  // Find color data for a specific day
+  const getColorForDay = (day: number) => {
+    return data.find(item => item.day === day);
   };
+  
+  // Day names for the calendar header
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   
   return (
     <Card className={className}>
@@ -112,76 +99,93 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-[400px] mt-4">
-          <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart
-                data={chartData}
-                margin={{ top: 20, right: 20, left: 20, bottom: 60 }}
-                barGap={0}
-              >
-                <XAxis 
-                  dataKey="day"
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
-                  tick={{ fontSize: 10 }}
-                />
-                <YAxis hide />
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      const data = payload[0].payload;
-                      return (
-                        <div className="p-3 bg-background border rounded-md shadow-md">
-                          <p className="font-bold">{data.day}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <div className="w-4 h-4 rounded" style={{ backgroundColor: data.color }}></div>
-                            <span className="text-xs">{data.color} ({data.colorMode})</span>
-                          </div>
-                          {data.note && <p className="text-xs mt-2">{data.note}</p>}
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                {chartData.map((entry, index) => {
-                  // Calculate x position for placing the color squares
-                  const barWidth = (100 / chartData.length);
-                  const xPos = (index * barWidth) + '%';
-                  const yPos = entry.colorMode === 'light' ? "20%" : "55%";
-                  
-                  return (
-                    <g key={`color-${index}`}>
-                      <foreignObject 
-                        x={`calc(${xPos} + 5%)`} 
-                        y={yPos}
-                        width={`${barWidth * 0.9}%`} 
-                        height="25%"
+        {viewMode === 'all' ? (
+          <div className="mt-4">
+            {/* Calendar View */}
+            <div className="grid grid-cols-7 gap-1">
+              {/* Calendar Header - Day Names */}
+              {dayNames.map((day, index) => (
+                <div key={index} className="text-center text-sm font-medium text-muted-foreground p-2">
+                  {day}
+                </div>
+              ))}
+              
+              {/* Calendar Cells */}
+              {calendarDays.map((day, index) => {
+                if (day === null) {
+                  // Empty cell
+                  return <div key={`empty-${index}`} className="aspect-square"></div>;
+                }
+                
+                const colorData = getColorForDay(day);
+                
+                return (
+                  <div 
+                    key={`day-${day}`} 
+                    className="aspect-square border rounded-md p-1 relative hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="text-xs font-medium absolute top-1 left-1">{day}</div>
+                    {colorData && (
+                      <div 
+                        className="absolute inset-4 rounded-md border overflow-hidden cursor-pointer"
+                        style={{ backgroundColor: colorData.color }}
+                        title={`${colorData.color} (${colorData.colorMode})`}
                       >
-                        <div 
-                          className="w-full h-full rounded-md border border-white/30"
-                          style={{ backgroundColor: entry.color }}
-                        />
-                      </foreignObject>
-                    </g>
-                  );
-                })}
-              </ComposedChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-          <div className="flex justify-center mt-2 gap-8">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-primary/20 border border-primary/50"></div>
-              <span className="text-xs">Light Colors</span>
+                        {colorData.note && (
+                          <div className="absolute bottom-0 right-0 w-2 h-2 bg-primary rounded-full m-0.5"></div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-secondary border border-secondary/50"></div>
-              <span className="text-xs">Dark Colors</span>
+            
+            <div className="flex justify-center mt-6 gap-8">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-primary/20 border border-primary/50"></div>
+                <span className="text-xs">Light Colors</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-secondary border border-secondary/50"></div>
+                <span className="text-xs">Dark Colors</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-primary"></div>
+                <span className="text-xs">Has Note</span>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="h-[400px] mt-4">
+            <ChartContainer>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
+                {filteredData.map((item, index) => (
+                  <div key={index} className="p-2 border rounded-md">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="text-sm font-medium">Day {item.day}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {format(addDays(startOfCurrentMonth, item.day - 1), 'MMM d')}
+                      </div>
+                    </div>
+                    <div 
+                      className="h-24 w-full rounded-md border" 
+                      style={{ backgroundColor: item.color }}
+                    ></div>
+                    <div className="mt-2">
+                      <p className="text-xs">{item.color} ({item.colorMode})</p>
+                      {item.note && (
+                        <p className="text-xs italic mt-1 truncate" title={item.note}>
+                          {item.note}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ChartContainer>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
