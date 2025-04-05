@@ -145,23 +145,6 @@ const Index = () => {
     return mostCommon;
   };
   
-  const renderColorPalettes = () => {
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {colorData.map((item, index) => (
-          <div key={index} className="border rounded-md overflow-hidden">
-            <div className="h-32" style={{ backgroundColor: item.color }}></div>
-            <div className="p-2 text-center">
-              <p className="text-sm font-medium">Day {item.day}</p>
-              <p className="text-xs text-muted-foreground">{item.color} ({item.colorMode})</p>
-              {item.note && <p className="text-xs italic mt-1">{item.note}</p>}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-  
   return (
     <div className="min-h-screen bg-background pb-20">
       <Navbar />
@@ -241,9 +224,7 @@ const Index = () => {
               <TabsList>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                <TabsTrigger value="palette">Color Palette</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                <TabsTrigger value="calendar">Calendar</TabsTrigger>
               </TabsList>
               
               <TabsContent value="overview" className="space-y-6">
@@ -319,13 +300,6 @@ const Index = () => {
                 </div>
               </TabsContent>
               
-              <TabsContent value="palette">
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold">Color Palette Collection</h2>
-                  {renderColorPalettes()}
-                </div>
-              </TabsContent>
-              
               <TabsContent value="analytics">
                 <Card>
                   <CardHeader>
@@ -341,10 +315,6 @@ const Index = () => {
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
-              
-              <TabsContent value="calendar">
-                <ColorCalendarWidget data={colorData} />
               </TabsContent>
             </Tabs>
           ) : (
