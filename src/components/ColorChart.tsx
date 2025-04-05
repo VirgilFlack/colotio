@@ -77,94 +77,98 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
         </div>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[400px] mt-4 pr-4">
-          {/* Calendar View */}
-          <div className="grid grid-cols-7 gap-1">
-            {/* Calendar Header - Day Names */}
-            {dayNames.map((day, index) => (
-              <div key={index} className="text-center text-sm font-medium text-muted-foreground p-2">
-                {day}
-              </div>
-            ))}
-            
-            {/* Calendar Cells */}
-            {calendarDays.map((day, index) => {
-              if (day === null) {
-                // Empty cell
-                return <div key={`empty-${index}`} className="aspect-square"></div>;
-              }
-              
-              const colorData = getColorForDay(day);
-              
-              return (
-                <div 
-                  key={`day-${day}`} 
-                  className="aspect-square border rounded-md p-1 relative hover:bg-muted/30 transition-colors"
-                >
-                  <div className="text-xs font-medium absolute top-1 left-1">{day}</div>
-                  {colorData && (
-                    <div 
-                      className={cn(
-                        "absolute inset-4 rounded-md border overflow-hidden cursor-pointer",
-                        colorData.colorMode === 'dark' && "bg-gray-800"
-                      )}
-                      style={{ backgroundColor: colorData.color }}
-                      title={`${colorData.color} (${colorData.colorMode})`}
-                    >
-                      {colorData.note && (
-                        <div className="absolute bottom-0 right-0 w-2 h-2 bg-primary rounded-full m-0.5"></div>
-                      )}
-                    </div>
-                  )}
+        <ScrollArea className="h-[380px] mt-4 pr-4">
+          <div className="pb-4">
+            {/* Calendar View */}
+            <div className="grid grid-cols-7 gap-1">
+              {/* Calendar Header - Day Names */}
+              {dayNames.map((day, index) => (
+                <div key={index} className="text-center text-sm font-medium text-muted-foreground p-2">
+                  {day}
                 </div>
-              );
-            })}
-          </div>
-          
-          <div className="flex justify-center mt-6 gap-8">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-primary/20 border border-primary/50"></div>
-              <span className="text-xs">Light Colors</span>
+              ))}
+              
+              {/* Calendar Cells */}
+              {calendarDays.map((day, index) => {
+                if (day === null) {
+                  // Empty cell
+                  return <div key={`empty-${index}`} className="aspect-square"></div>;
+                }
+                
+                const colorData = getColorForDay(day);
+                
+                return (
+                  <div 
+                    key={`day-${day}`} 
+                    className="aspect-square border rounded-md p-1 relative hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="text-xs font-medium absolute top-1 left-1">{day}</div>
+                    {colorData && (
+                      <div 
+                        className={cn(
+                          "absolute inset-4 rounded-md border overflow-hidden cursor-pointer",
+                          colorData.colorMode === 'dark' && "bg-gray-800"
+                        )}
+                        style={{ backgroundColor: colorData.color }}
+                        title={`${colorData.color} (${colorData.colorMode})`}
+                      >
+                        {colorData.note && (
+                          <div className="absolute bottom-0 right-0 w-2 h-2 bg-primary rounded-full m-0.5"></div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-gray-800 border border-secondary/50"></div>
-              <span className="text-xs">Dark Colors</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-primary"></div>
-              <span className="text-xs">Has Note</span>
+            
+            <div className="flex justify-center mt-6 gap-8">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-primary/20 border border-primary/50"></div>
+                <span className="text-xs">Light Colors</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-gray-800 border border-secondary/50"></div>
+                <span className="text-xs">Dark Colors</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-primary"></div>
+                <span className="text-xs">Has Note</span>
+              </div>
             </div>
           </div>
         </ScrollArea>
 
         <ChartContainer config={chartConfig}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
-            {data.map((item, index) => (
-              <div key={index} className="p-2 border rounded-md">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-sm font-medium">Day {item.day}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {format(addDays(startOfCurrentMonth, item.day - 1), 'MMM d')}
+          <ScrollArea className="max-h-[300px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6 pb-4">
+              {data.map((item, index) => (
+                <div key={index} className="p-2 border rounded-md">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="text-sm font-medium">Day {item.day}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {format(addDays(startOfCurrentMonth, item.day - 1), 'MMM d')}
+                    </div>
+                  </div>
+                  <div 
+                    className={cn(
+                      "h-24 w-full rounded-md border",
+                      item.colorMode === 'dark' && "bg-gray-800"
+                    )}
+                    style={{ backgroundColor: item.color }}
+                  ></div>
+                  <div className="mt-2">
+                    <p className="text-xs">{item.color} ({item.colorMode})</p>
+                    {item.note && (
+                      <p className="text-xs italic mt-1 truncate" title={item.note}>
+                        {item.note}
+                      </p>
+                    )}
                   </div>
                 </div>
-                <div 
-                  className={cn(
-                    "h-24 w-full rounded-md border",
-                    item.colorMode === 'dark' && "bg-gray-800"
-                  )}
-                  style={{ backgroundColor: item.color }}
-                ></div>
-                <div className="mt-2">
-                  <p className="text-xs">{item.color} ({item.colorMode})</p>
-                  {item.note && (
-                    <p className="text-xs italic mt-1 truncate" title={item.note}>
-                      {item.note}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </ScrollArea>
         </ChartContainer>
       </CardContent>
     </Card>

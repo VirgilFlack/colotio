@@ -147,7 +147,7 @@ const Index = () => {
   };
   
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-hidden">
       <Navbar />
       
       <main className="container mx-auto px-4 pt-20 pb-16 max-w-7xl">
@@ -173,113 +173,119 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <Card 
-              className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in"
-              onClick={goToDataInput}
-            >
-              <div className="flex flex-col items-center justify-center h-full space-y-4 p-6">
-                <div className="p-4 rounded-full bg-primary/10">
-                  <PlusCircle className="h-12 w-12 text-primary" />
+          <ScrollArea className="w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pb-4">
+              <Card 
+                className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in"
+                onClick={goToDataInput}
+              >
+                <div className="flex flex-col items-center justify-center h-full space-y-4 p-6">
+                  <div className="p-4 rounded-full bg-primary/10">
+                    <PlusCircle className="h-12 w-12 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold mb-2">Data Input</h2>
+                    <p className="text-muted-foreground">Add or edit your color collection data</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold mb-2">Data Input</h2>
-                  <p className="text-muted-foreground">Add or edit your color collection data</p>
+              </Card>
+              
+              <Card 
+                className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in [animation-delay:100ms]"
+                onClick={goToCalendar}
+              >
+                <div className="flex flex-col items-center justify-center h-full space-y-4 p-6">
+                  <div className="p-4 rounded-full bg-primary/10">
+                    <Calendar className="h-12 w-12 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold mb-2">Calendar View</h2>
+                    <p className="text-muted-foreground">See your color data in a calendar format</p>
+                  </div>
                 </div>
-              </div>
-            </Card>
-            
-            <Card 
-              className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in [animation-delay:100ms]"
-              onClick={goToCalendar}
-            >
-              <div className="flex flex-col items-center justify-center h-full space-y-4 p-6">
-                <div className="p-4 rounded-full bg-primary/10">
-                  <Calendar className="h-12 w-12 text-primary" />
+              </Card>
+              
+              <Card 
+                className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in [animation-delay:200ms]"
+                onClick={goToAnalytics}
+              >
+                <div className="flex flex-col items-center justify-center h-full space-y-4 p-6">
+                  <div className="p-4 rounded-full bg-primary/10">
+                    <BarChart className="h-12 w-12 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold mb-2">Analytics</h2>
+                    <p className="text-muted-foreground">View detailed analytics of your color data</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold mb-2">Calendar View</h2>
-                  <p className="text-muted-foreground">See your color data in a calendar format</p>
-                </div>
-              </div>
-            </Card>
-            
-            <Card 
-              className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in [animation-delay:200ms]"
-              onClick={goToAnalytics}
-            >
-              <div className="flex flex-col items-center justify-center h-full space-y-4 p-6">
-                <div className="p-4 rounded-full bg-primary/10">
-                  <BarChart className="h-12 w-12 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold mb-2">Analytics</h2>
-                  <p className="text-muted-foreground">View detailed analytics of your color data</p>
-                </div>
-              </div>
-            </Card>
-          </div>
+              </Card>
+            </div>
+          </ScrollArea>
           
           {hasData ? (
             <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <TabsList className="w-full sm:w-auto overflow-x-auto scrollbar-thin flex flex-nowrap">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              </TabsList>
+              <div className="w-full overflow-x-auto no-scrollbar">
+                <TabsList className="w-full sm:w-auto flex flex-nowrap">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="timeline">Timeline</TabsTrigger>
+                  <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                </TabsList>
+              </div>
               
               <TabsContent value="overview" className="space-y-6">
-                <ColorChart
-                  data={colorData}
-                />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Light Colors Timeline</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ScrollArea className="h-full max-h-48">
-                        <div className="flex flex-wrap gap-2">
-                          {colorData.filter(item => item.colorMode === 'light').map((item, index) => (
-                            <div 
-                              key={index} 
-                              className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
-                              style={{ backgroundColor: item.color }}
-                              title={`Day ${item.day}: ${item.color}`}
-                            />
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </CardContent>
-                  </Card>
+                <ScrollArea className="w-full max-h-[calc(100vh-360px)]">
+                  <ColorChart
+                    data={colorData}
+                  />
                   
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Dark Colors Timeline</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ScrollArea className="h-full max-h-48">
-                        <div className="flex flex-wrap gap-2">
-                          {colorData.filter(item => item.colorMode === 'dark').map((item, index) => (
-                            <div 
-                              key={index} 
-                              className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
-                              style={{ backgroundColor: item.color }}
-                              title={`Day ${item.day}: ${item.color}`}
-                            />
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </CardContent>
-                  </Card>
-                </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Light Colors Timeline</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ScrollArea className="h-full max-h-48">
+                          <div className="flex flex-wrap gap-2 pb-2">
+                            {colorData.filter(item => item.colorMode === 'light').map((item, index) => (
+                              <div 
+                                key={index} 
+                                className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
+                                style={{ backgroundColor: item.color }}
+                                title={`Day ${item.day}: ${item.color}`}
+                              />
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Dark Colors Timeline</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ScrollArea className="h-full max-h-48">
+                          <div className="flex flex-wrap gap-2 pb-2">
+                            {colorData.filter(item => item.colorMode === 'dark').map((item, index) => (
+                              <div 
+                                key={index} 
+                                className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
+                                style={{ backgroundColor: item.color }}
+                                title={`Day ${item.day}: ${item.color}`}
+                              />
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </ScrollArea>
               </TabsContent>
               
               <TabsContent value="timeline">
                 <div className="space-y-4">
                   <h2 className="text-xl font-bold">30-Day Color Timeline</h2>
-                  <ScrollArea className="max-h-[calc(100vh-300px)]">
+                  <ScrollArea className="max-h-[calc(100vh-360px)]">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
                       {colorData.map((item, index) => (
                         <Card key={index} className="overflow-hidden">
@@ -308,20 +314,22 @@ const Index = () => {
               </TabsContent>
               
               <TabsContent value="analytics">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Color Analysis</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex justify-center">
-                    <div className="text-center p-12 max-w-md">
-                      <p className="text-muted-foreground">
-                        Advanced color analytics will be available in a future update.
-                        This will include color harmony analysis, trend detection, and
-                        color psychology insights.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                <ScrollArea className="max-h-[calc(100vh-360px)]">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Color Analysis</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex justify-center pb-4">
+                      <div className="text-center p-12 max-w-md">
+                        <p className="text-muted-foreground">
+                          Advanced color analytics will be available in a future update.
+                          This will include color harmony analysis, trend detection, and
+                          color psychology insights.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </ScrollArea>
               </TabsContent>
             </Tabs>
           ) : (
