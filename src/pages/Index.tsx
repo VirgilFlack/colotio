@@ -192,12 +192,10 @@ const Index = () => {
           </ScrollArea>
           
           {hasData ? (
-            <ScrollArea className="w-full max-h-[calc(100vh-360px)]">
-              <div className="space-y-6 pb-4">
-                <h2 className="text-xl font-bold">Color Calendar</h2>
-                <ColorChart data={colorData} />
-              </div>
-            </ScrollArea>
+            <div className="h-full space-y-6">
+              <h2 className="text-xl font-bold">Color Calendar</h2>
+              <ColorChart data={colorData} />
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center p-12 border border-dashed rounded-lg mt-8">
               <Calendar className="h-16 w-16 text-muted-foreground/50 mb-4" />

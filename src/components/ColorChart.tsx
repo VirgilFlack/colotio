@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -25,6 +25,7 @@ interface ColorChartProps {
 }
 
 const ColorChart = ({ title, data, className }: ColorChartProps) => {
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [scrollToBottom, setScrollToBottom] = useState(false);
   
   // Get current month data for calendar view
@@ -75,14 +76,25 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
   
   // Handle scroll to bottom
   const handleScrollToBottom = () => {
-    const scrollArea = document.querySelector('.color-chart-scroll-area');
-    if (scrollArea) {
-      scrollArea.scrollTo({
-        top: scrollArea.scrollHeight,
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTo({
+        top: scrollAreaRef.current.scrollHeight,
         behavior: 'smooth'
       });
     }
   };
+
+  // For direct access to ScrollArea's scrollTo method
+  useEffect(() => {
+    const scrollArea = document.querySelector('.color-chart-scroll-area');
+    if (scrollArea && scrollToBottom) {
+      scrollArea.scrollTo({
+        top: scrollArea.scrollHeight,
+        behavior: 'smooth'
+      });
+      setScrollToBottom(false);
+    }
+  }, [scrollToBottom]);
   
   return (
     <Card className={className}>
@@ -100,7 +112,10 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
         </div>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[380px] mt-4 pr-4 color-chart-scroll-area">
+        <ScrollArea 
+          className="h-[520px] mt-4 pr-4 color-chart-scroll-area"
+          ref={scrollAreaRef}
+        >
           <div className="pb-4">
             {/* Calendar View */}
             <div className="grid grid-cols-7 gap-1">
@@ -172,7 +187,7 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
             </div>
 
             <ChartContainer config={chartConfig}>
-              <ScrollArea className="max-h-[300px]">
+              <ScrollArea className="max-h-[400px]">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6 pb-4">
                   {data.map((item, index) => (
                     <div key={index} className="p-2 border rounded-md">
