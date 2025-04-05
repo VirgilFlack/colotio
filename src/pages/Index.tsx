@@ -1,8 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import ColorChart from '@/components/ColorChart';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlusCircle, BarChart, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -38,7 +38,6 @@ const positiveMessages = [
 ];
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState('overview');
   const navigate = useNavigate();
   
   const [colorData, setColorData] = useState<ColorData[]>([]);
@@ -114,35 +113,6 @@ const Index = () => {
       description: "This feature is under development.",
       duration: 3000,
     });
-  };
-  
-  const getUniqueColorCount = (type: 'light' | 'dark') => {
-    const uniqueColors = new Set(colorData
-      .filter(item => item.colorMode === type)
-      .map(item => item.color)
-    );
-    return uniqueColors.size;
-  };
-  
-  const getMostCommonColor = (type: 'light' | 'dark') => {
-    const filteredColors = colorData.filter(item => item.colorMode === type);
-    const colorCounts: Record<string, number> = {};
-    
-    filteredColors.forEach(item => {
-      colorCounts[item.color] = (colorCounts[item.color] || 0) + 1;
-    });
-    
-    let mostCommon = '';
-    let highestCount = 0;
-    
-    Object.entries(colorCounts).forEach(([color, count]) => {
-      if (count > highestCount) {
-        mostCommon = color;
-        highestCount = count;
-      }
-    });
-    
-    return mostCommon;
   };
   
   return (
@@ -222,112 +192,12 @@ const Index = () => {
           </ScrollArea>
           
           {hasData ? (
-            <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <div className="w-full overflow-x-auto no-scrollbar">
-                <TabsList className="w-full sm:w-auto flex flex-nowrap">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="calendar">Calendar</TabsTrigger>
-                </TabsList>
+            <ScrollArea className="w-full max-h-[calc(100vh-360px)]">
+              <div className="space-y-6 pb-4">
+                <h2 className="text-xl font-bold">Color Calendar</h2>
+                <ColorChart data={colorData} />
               </div>
-              
-              <TabsContent value="overview" className="space-y-6">
-                <ScrollArea className="w-full max-h-[calc(100vh-360px)]">
-                  <div className="space-y-6">
-                    <div className="space-y-4">
-                      <h2 className="text-xl font-bold">30-Day Color Timeline</h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
-                        {colorData.map((item, index) => (
-                          <Card key={index} className="overflow-hidden">
-                            <div className="h-24" style={{backgroundColor: item.color}}></div>
-                            <CardContent className="p-4">
-                              <h3 className="font-semibold">Day {item.day}</h3>
-                              <div className="mt-2 text-xs">
-                                <div>
-                                  <span className="text-muted-foreground">Color: </span>
-                                  {item.color}
-                                </div>
-                                <div>
-                                  <span className="text-muted-foreground">Mode: </span>
-                                  {item.colorMode}
-                                </div>
-                                {item.note && (
-                                  <p className="text-xs mt-2 italic">{item.note}</p>
-                                )}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Color Analysis</CardTitle>
-                      </CardHeader>
-                      <CardContent className="flex justify-center pb-4">
-                        <div className="text-center p-12 max-w-md">
-                          <p className="text-muted-foreground">
-                            Advanced color analytics will be available in a future update.
-                            This will include color harmony analysis, trend detection, and
-                            color psychology insights.
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Light Colors Timeline</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <ScrollArea className="h-full max-h-48">
-                            <div className="flex flex-wrap gap-2 pb-2">
-                              {colorData.filter(item => item.colorMode === 'light').map((item, index) => (
-                                <div 
-                                  key={index} 
-                                  className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
-                                  style={{ backgroundColor: item.color }}
-                                  title={`Day ${item.day}: ${item.color}`}
-                                />
-                              ))}
-                            </div>
-                          </ScrollArea>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Dark Colors Timeline</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <ScrollArea className="h-full max-h-48">
-                            <div className="flex flex-wrap gap-2 pb-2">
-                              {colorData.filter(item => item.colorMode === 'dark').map((item, index) => (
-                                <div 
-                                  key={index} 
-                                  className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
-                                  style={{ backgroundColor: item.color }}
-                                  title={`Day ${item.day}: ${item.color}`}
-                                />
-                              ))}
-                            </div>
-                          </ScrollArea>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-                </ScrollArea>
-              </TabsContent>
-              
-              <TabsContent value="calendar" className="space-y-6">
-                <ScrollArea className="w-full max-h-[calc(100vh-360px)]">
-                  <ColorChart
-                    data={colorData}
-                  />
-                </ScrollArea>
-              </TabsContent>
-            </Tabs>
+            </ScrollArea>
           ) : (
             <div className="flex flex-col items-center justify-center p-12 border border-dashed rounded-lg mt-8">
               <Calendar className="h-16 w-16 text-muted-foreground/50 mb-4" />
