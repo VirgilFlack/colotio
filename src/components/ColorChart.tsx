@@ -2,14 +2,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  ChartContainer,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { format, addDays, startOfMonth, getDaysInMonth } from 'date-fns';
+import { format, startOfMonth, getDaysInMonth } from 'date-fns';
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
 
 interface ColorChartProps {
   title?: string;
@@ -26,7 +20,6 @@ interface ColorChartProps {
 
 const ColorChart = ({ title, data, className }: ColorChartProps) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const [scrollToBottom, setScrollToBottom] = useState(false);
   
   // Get current month data for calendar view
   const currentDate = new Date();
@@ -57,58 +50,12 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
   
   // Day names for the calendar header
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-  // Chart configuration object required by ChartContainer
-  const chartConfig = {
-    color: {
-      label: "Color",
-      color: "#8B5CF6" // Default purple color
-    },
-    light: {
-      label: "Light Mode",
-      color: "#D6BCFA" // Light purple
-    },
-    dark: {
-      label: "Dark Mode",
-      color: "#6E59A5" // Dark purple
-    }
-  };
-  
-  // Handle scroll to bottom
-  const handleScrollToBottom = () => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({
-        top: scrollAreaRef.current.scrollHeight,
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  // For direct access to ScrollArea's scrollTo method
-  useEffect(() => {
-    const scrollArea = document.querySelector('.color-chart-scroll-area');
-    if (scrollArea && scrollToBottom) {
-      scrollArea.scrollTo({
-        top: scrollArea.scrollHeight,
-        behavior: 'smooth'
-      });
-      setScrollToBottom(false);
-    }
-  }, [scrollToBottom]);
   
   return (
     <Card className={className}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">{title || currentMonthName}</CardTitle>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="gap-1 text-xs" 
-            onClick={handleScrollToBottom}
-          >
-            View Color Tiles <ChevronDown className="h-3 w-3" />
-          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -174,49 +121,6 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
                 <span className="text-xs">Has Note</span>
               </div>
             </div>
-            
-            <div className="flex justify-center my-6">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-1 text-xs"
-                onClick={handleScrollToBottom}
-              >
-                Color Tiles Below <ChevronDown className="h-3 w-3" />
-              </Button>
-            </div>
-
-            <ChartContainer config={chartConfig}>
-              <ScrollArea className="max-h-[400px]">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6 pb-4">
-                  {data.map((item, index) => (
-                    <div key={index} className="p-2 border rounded-md">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="text-sm font-medium">Day {item.day}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {format(addDays(startOfCurrentMonth, item.day - 1), 'MMM d')}
-                        </div>
-                      </div>
-                      <div 
-                        className={cn(
-                          "h-24 w-full rounded-md border",
-                          item.colorMode === 'dark' && "bg-gray-800"
-                        )}
-                        style={{ backgroundColor: item.color }}
-                      ></div>
-                      <div className="mt-2">
-                        <p className="text-xs">{item.color} ({item.colorMode})</p>
-                        {item.note && (
-                          <p className="text-xs italic mt-1 truncate" title={item.note}>
-                            {item.note}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </ChartContainer>
           </div>
         </ScrollArea>
       </CardContent>
