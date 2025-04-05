@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -45,7 +44,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Define the allowed colors
 const ALLOWED_COLORS = {
   Red: "#FF0000",
   Blue: "#0000FF",
@@ -57,7 +55,6 @@ const ALLOWED_COLORS = {
   White: "#FFFFFF"
 };
 
-// Schema for form validation
 const dataSchema = z.object({
   datasetName: z.string().min(2, { message: "Dataset name must be at least 2 characters" }),
   description: z.string().optional(),
@@ -78,15 +75,13 @@ const DataInput = () => {
   const [activeTab, setActiveTab] = useState("single-day");
   const [currentDay, setCurrentDay] = useState(1);
 
-  // Get the current month name
   const currentMonthName = new Date().toLocaleString('default', { month: 'long' });
   const currentYear = new Date().getFullYear();
   const defaultDatasetName = `${currentMonthName} ${currentYear}`;
 
-  // Initialize with 30 days of empty color data
   const initialColorData = Array.from({ length: 30 }, (_, i) => ({
     day: i + 1,
-    color: ALLOWED_COLORS.Blue, // Default to blue
+    color: ALLOWED_COLORS.Blue,
     colorMode: 'light' as const,
     note: "",
   }));
@@ -103,31 +98,26 @@ const DataInput = () => {
   });
 
   useEffect(() => {
-    // Check if there's existing data in localStorage
     const userData = localStorage.getItem("userData");
     if (userData) {
       try {
         const parsedData = JSON.parse(userData);
         if (parsedData.colorData && Array.isArray(parsedData.colorData)) {
-          // Handle potential format change from old format to new format
           const formattedData = parsedData.colorData.map((item: any) => {
-            // If the data is in old format (with lightColor and darkColor)
             if (item.lightColor && item.darkColor) {
               return {
                 day: item.day,
-                color: item.lightColor, // Default to light color
+                color: item.lightColor,
                 colorMode: 'light' as const,
                 note: item.note || '',
               };
             }
-            // If the data is already in the new format
             return item;
           });
           
           setColorData(formattedData);
           form.setValue("colorData", formattedData);
         }
-        // We're not loading the saved dataset name anymore, but always using the current month
         form.setValue("datasetName", defaultDatasetName);
         if (parsedData.description) {
           form.setValue("description", parsedData.description);
@@ -139,16 +129,13 @@ const DataInput = () => {
   }, [form, defaultDatasetName]);
 
   const onSubmit = (data: FormData) => {
-    // Always ensure the dataset name is the current month before saving
     data.datasetName = defaultDatasetName;
     
-    // Store data in localStorage
     localStorage.setItem("userData", JSON.stringify(data));
     toast.success("Color data saved successfully");
-    navigate("/"); // Navigate to dashboard
+    navigate("/dashboard");
   };
 
-  // Update color data for a specific day
   const updateColorData = (day: number, field: string, value: string | 'light' | 'dark') => {
     const updated = [...colorData];
     updated[day - 1] = { ...updated[day - 1], [field]: value };
@@ -156,13 +143,11 @@ const DataInput = () => {
     form.setValue("colorData", updated);
   };
 
-  // Get color name from hex value
   const getColorNameFromHex = (hexValue: string) => {
     const entry = Object.entries(ALLOWED_COLORS).find(([_, hex]) => hex === hexValue);
     return entry ? entry[0] : 'Unknown';
   };
 
-  // Generate a preview swatch
   const ColorSwatch = ({ color }: { color: string }) => (
     <div 
       className="w-6 h-6 rounded-full border border-border" 
