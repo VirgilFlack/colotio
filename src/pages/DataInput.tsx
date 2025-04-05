@@ -26,7 +26,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Calendar, Info } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Dialog,
@@ -55,6 +54,13 @@ const ALLOWED_COLORS = {
   White: "#FFFFFF"
 };
 
+interface DayColorData {
+  day: number;
+  color?: string;
+  colorMode?: 'light' | 'dark';
+  note?: string;
+}
+
 const dataSchema = z.object({
   datasetName: z.string().min(2, { message: "Dataset name must be at least 2 characters" }),
   description: z.string().optional(),
@@ -72,18 +78,17 @@ type FormData = z.infer<typeof dataSchema>;
 
 const DataInput = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("single-day");
   const [currentDay, setCurrentDay] = useState(1);
 
   const currentMonthName = new Date().toLocaleString('default', { month: 'long' });
   const currentYear = new Date().getFullYear();
   const defaultDatasetName = `${currentMonthName} ${currentYear}`;
 
-  const initialColorData = Array.from({ length: 30 }, (_, i) => ({
+  const initialColorData: DayColorData[] = Array.from({ length: 30 }, (_, i) => ({
     day: i + 1,
   }));
   
-  const [colorData, setColorData] = useState(initialColorData);
+  const [colorData, setColorData] = useState<DayColorData[]>(initialColorData);
 
   const form = useForm<FormData>({
     resolver: zodResolver(dataSchema),
@@ -170,7 +175,7 @@ const DataInput = () => {
 
   const getColorNameFromHex = (hexValue: string) => {
     const entry = Object.entries(ALLOWED_COLORS).find(([_, hex]) => hex === hexValue);
-    return entry ? entry[0] : 'Unknown';
+    return entry ? entry[0] : '';
   };
 
   const ColorSwatch = ({ color }: { color: string }) => (
@@ -426,177 +431,89 @@ const DataInput = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="mb-4">
-                      <TabsTrigger value="single-day">Day by Day</TabsTrigger>
-                      <TabsTrigger value="all-days">All Days</TabsTrigger>
-                    </TabsList>
+                  <div className="flex flex-col gap-6">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Select day (1-30)</p>
+                      <div className="flex items-center gap-4">
+                        <Slider 
+                          value={[currentDay]} 
+                          min={1} 
+                          max={30} 
+                          step={1} 
+                          onValueChange={(value) => setCurrentDay(value[0])}
+                          className="max-w-md"
+                        />
+                        <span className="font-medium">Day {currentDay}</span>
+                      </div>
+                    </div>
                     
-                    <TabsContent value="single-day" className="space-y-4">
-                      <div className="flex flex-col gap-6">
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-2">Select day (1-30)</p>
-                          <div className="flex items-center gap-4">
-                            <Slider 
-                              value={[currentDay]} 
-                              min={1} 
-                              max={30} 
-                              step={1} 
-                              onValueChange={(value) => setCurrentDay(value[0])}
-                              className="max-w-md"
-                            />
-                            <span className="font-medium">Day {currentDay}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-6">
-                          <div className="space-y-4">
-                            <FormLabel htmlFor={`color-${currentDay}`}>Color</FormLabel>
-                            <div className="flex items-center gap-3">
-                              <ColorSwatch color={colorData[currentDay - 1]?.color || "#FFFFFF"} />
-                              <Select
-                                value={getColorNameFromHex(colorData[currentDay - 1]?.color as string) || ""}
-                                onValueChange={(value) => {
-                                  updateColorData(currentDay, "color", ALLOWED_COLORS[value as keyof typeof ALLOWED_COLORS]);
-                                  if (!colorData[currentDay - 1]?.colorMode) {
-                                    updateColorData(currentDay, "colorMode", "light");
-                                  }
-                                }}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Select a color" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {Object.entries(ALLOWED_COLORS).map(([name, hex]) => (
-                                    <SelectItem key={name} value={name}>
-                                      <div className="flex items-center gap-2">
-                                        <div 
-                                          className="w-4 h-4 rounded-full" 
-                                          style={{ backgroundColor: hex }}
-                                        ></div>
-                                        <span>{name}</span>
-                                      </div>
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <FormLabel>Color Mode</FormLabel>
-                            <RadioGroup 
-                              value={colorData[currentDay - 1]?.colorMode || ""}
-                              onValueChange={(value) => updateColorData(
-                                currentDay, 
-                                "colorMode", 
-                                value as 'light' | 'dark'
-                              )}
-                              className="flex space-x-4"
-                            >
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="light" id="light" />
-                                <FormLabel htmlFor="light" className="font-normal">Light</FormLabel>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="dark" id="dark" />
-                                <FormLabel htmlFor="dark" className="font-normal">Dark</FormLabel>
-                              </div>
-                            </RadioGroup>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <FormLabel htmlFor={`note-${currentDay}`}>Note (optional)</FormLabel>
-                          <Input
-                            id={`note-${currentDay}`}
-                            placeholder="Any notes about this day's colors"
-                            value={colorData[currentDay - 1]?.note || ""}
-                            onChange={(e) => updateColorData(currentDay, "note", e.target.value)}
-                          />
+                    <div className="space-y-6">
+                      <div className="space-y-4">
+                        <FormLabel htmlFor={`color-${currentDay}`}>Color</FormLabel>
+                        <div className="flex items-center gap-3">
+                          <ColorSwatch color={colorData[currentDay - 1]?.color || "#FFFFFF"} />
+                          <Select
+                            value={getColorNameFromHex(colorData[currentDay - 1]?.color || "")}
+                            onValueChange={(value) => {
+                              updateColorData(currentDay, "color", ALLOWED_COLORS[value as keyof typeof ALLOWED_COLORS]);
+                              if (!colorData[currentDay - 1]?.colorMode) {
+                                updateColorData(currentDay, "colorMode", "light");
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select a color" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.entries(ALLOWED_COLORS).map(([name, hex]) => (
+                                <SelectItem key={name} value={name}>
+                                  <div className="flex items-center gap-2">
+                                    <div 
+                                      className="w-4 h-4 rounded-full" 
+                                      style={{ backgroundColor: hex }}
+                                    ></div>
+                                    <span>{name}</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="all-days">
-                      <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-                        {colorData.map((day, index) => (
-                          <div key={index} className="p-4 border rounded-md">
-                            <h3 className="text-sm font-medium mb-3">Day {day.day}</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                              <div className="flex items-center gap-2">
-                                <FormLabel className="min-w-16 text-xs">Color:</FormLabel>
-                                <div className="flex items-center gap-2">
-                                  <ColorSwatch color={day.color || "#FFFFFF"} />
-                                  <Select
-                                    value={getColorNameFromHex(day.color as string) || ""}
-                                    onValueChange={(value) => {
-                                      updateColorData(day.day, "color", ALLOWED_COLORS[value as keyof typeof ALLOWED_COLORS]);
-                                      if (!day.colorMode) {
-                                        updateColorData(day.day, "colorMode", "light");
-                                      }
-                                    }}
-                                  >
-                                    <SelectTrigger className="h-8 text-xs">
-                                      <SelectValue placeholder="Select a color" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {Object.entries(ALLOWED_COLORS).map(([name, hex]) => (
-                                        <SelectItem key={name} value={name}>
-                                          <div className="flex items-center gap-2">
-                                            <div 
-                                              className="w-3 h-3 rounded-full" 
-                                              style={{ backgroundColor: hex }}
-                                            ></div>
-                                            <span>{name}</span>
-                                          </div>
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-2">
-                                <FormLabel className="min-w-16 text-xs">Mode:</FormLabel>
-                                <div className="flex items-center gap-2">
-                                  <RadioGroup 
-                                    value={day.colorMode || ""}
-                                    onValueChange={(value) => updateColorData(
-                                      day.day, 
-                                      "colorMode", 
-                                      value as 'light' | 'dark'
-                                    )}
-                                    className="flex space-x-4"
-                                  >
-                                    <div className="flex items-center space-x-2">
-                                      <RadioGroupItem value="light" id={`light-${day.day}`} />
-                                      <FormLabel htmlFor={`light-${day.day}`} className="text-xs font-normal">Light</FormLabel>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                      <RadioGroupItem value="dark" id={`dark-${day.day}`} />
-                                      <FormLabel htmlFor={`dark-${day.day}`} className="text-xs font-normal">Dark</FormLabel>
-                                    </div>
-                                  </RadioGroup>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-2">
-                                <FormLabel className="min-w-16 text-xs">Note:</FormLabel>
-                                <Input
-                                  type="text"
-                                  className="h-8 text-xs"
-                                  value={day.note || ""}
-                                  onChange={(e) => updateColorData(day.day, "note", e.target.value)}
-                                  placeholder="Note"
-                                />
-                              </div>
-                            </div>
+                      
+                      <div className="space-y-2">
+                        <FormLabel>Color Mode</FormLabel>
+                        <RadioGroup 
+                          value={colorData[currentDay - 1]?.colorMode || ""}
+                          onValueChange={(value) => updateColorData(
+                            currentDay, 
+                            "colorMode", 
+                            value as 'light' | 'dark'
+                          )}
+                          className="flex space-x-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="light" id="light" />
+                            <FormLabel htmlFor="light" className="font-normal">Light</FormLabel>
                           </div>
-                        ))}
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="dark" id="dark" />
+                            <FormLabel htmlFor="dark" className="font-normal">Dark</FormLabel>
+                          </div>
+                        </RadioGroup>
                       </div>
-                    </TabsContent>
-                  </Tabs>
+                    </div>
+                    
+                    <div>
+                      <FormLabel htmlFor={`note-${currentDay}`}>Note (optional)</FormLabel>
+                      <Input
+                        id={`note-${currentDay}`}
+                        placeholder="Any notes about this day's colors"
+                        value={colorData[currentDay - 1]?.note || ""}
+                        onChange={(e) => updateColorData(currentDay, "note", e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
               
