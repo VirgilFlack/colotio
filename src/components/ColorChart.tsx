@@ -64,6 +64,22 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
   
   // Day names for the calendar header
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Chart configuration object required by ChartContainer
+  const chartConfig = {
+    color: {
+      label: "Color",
+      color: "#8B5CF6" // Default purple color
+    },
+    light: {
+      label: "Light Mode",
+      color: "#D6BCFA" // Light purple
+    },
+    dark: {
+      label: "Dark Mode",
+      color: "#6E59A5" // Dark purple
+    }
+  };
   
   return (
     <Card className={className}>
@@ -158,7 +174,7 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
           </div>
         ) : (
           <div className="h-[400px] mt-4">
-            <ChartContainer>
+            <ChartContainer config={chartConfig}>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
                 {filteredData.map((item, index) => (
                   <div key={index} className="p-2 border rounded-md">
