@@ -49,13 +49,11 @@ const Index = () => {
   const [positiveMessage, setPositiveMessage] = useState('');
   
   useEffect(() => {
-    // Get user name from localStorage
     const storedName = localStorage.getItem('userName');
     if (storedName) {
       setUserName(storedName);
     }
 
-    // Set a random positive message
     const randomIndex = Math.floor(Math.random() * positiveMessages.length);
     setPositiveMessage(positiveMessages[randomIndex]);
 
@@ -176,9 +174,6 @@ const Index = () => {
               <p className="text-muted-foreground mt-1 whitespace-normal break-words">
                 {positiveMessage}
               </p>
-              {description && hasData && (
-                <p className="text-sm mt-2 italic">{description}</p>
-              )}
             </div>
             <div className="flex gap-2">
               <Button onClick={goToDataInput} variant="outline" className="gap-2">
@@ -252,7 +247,6 @@ const Index = () => {
               
               <TabsContent value="overview" className="space-y-6">
                 <ColorChart
-                  title="30-Day Color Collection"
                   data={colorData}
                 />
                 
