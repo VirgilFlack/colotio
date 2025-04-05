@@ -11,7 +11,7 @@ import { format, addDays, startOfMonth, getDaysInMonth } from 'date-fns';
 import { CalendarDays } from 'lucide-react';
 
 interface ColorChartProps {
-  title: string;
+  title?: string;
   data: Array<{
     day: number;
     lightColor?: string;
@@ -43,6 +43,9 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
   const startOfCurrentMonth = startOfMonth(currentDate);
   const daysInMonth = getDaysInMonth(currentDate);
   const firstDayOfMonth = startOfCurrentMonth.getDay(); // 0 for Sunday, 1 for Monday, etc.
+  
+  // Get current month name
+  const currentMonthName = format(currentDate, 'MMMM yyyy');
   
   // Create calendar grid
   const calendarDays = [];
@@ -85,7 +88,7 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
     <Card className={className}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+          <CardTitle className="text-lg font-semibold">{title || currentMonthName}</CardTitle>
           <div className="flex items-center gap-1 bg-muted rounded-md p-0.5">
             <Button 
               variant={viewMode === '7d' ? 'default' : 'ghost'}
