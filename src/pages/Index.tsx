@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -147,7 +146,7 @@ const Index = () => {
   };
   
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="min-h-screen bg-background overflow-hidden overflow-x-hidden">
       <Navbar />
       
       <main className="container mx-auto px-4 pt-20 pb-16 max-w-7xl">
@@ -227,108 +226,105 @@ const Index = () => {
               <div className="w-full overflow-x-auto no-scrollbar">
                 <TabsList className="w-full sm:w-auto flex flex-nowrap">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                  <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                  <TabsTrigger value="calendar">Calendar</TabsTrigger>
                 </TabsList>
               </div>
               
               <TabsContent value="overview" className="space-y-6">
                 <ScrollArea className="w-full max-h-[calc(100vh-360px)]">
-                  <ColorChart
-                    data={colorData}
-                  />
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Light Colors Timeline</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ScrollArea className="h-full max-h-48">
-                          <div className="flex flex-wrap gap-2 pb-2">
-                            {colorData.filter(item => item.colorMode === 'light').map((item, index) => (
-                              <div 
-                                key={index} 
-                                className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
-                                style={{ backgroundColor: item.color }}
-                                title={`Day ${item.day}: ${item.color}`}
-                              />
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      </CardContent>
-                    </Card>
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <h2 className="text-xl font-bold">30-Day Color Timeline</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+                        {colorData.map((item, index) => (
+                          <Card key={index} className="overflow-hidden">
+                            <div className="h-24" style={{backgroundColor: item.color}}></div>
+                            <CardContent className="p-4">
+                              <h3 className="font-semibold">Day {item.day}</h3>
+                              <div className="mt-2 text-xs">
+                                <div>
+                                  <span className="text-muted-foreground">Color: </span>
+                                  {item.color}
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Mode: </span>
+                                  {item.colorMode}
+                                </div>
+                                {item.note && (
+                                  <p className="text-xs mt-2 italic">{item.note}</p>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
                     
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-lg">Dark Colors Timeline</CardTitle>
+                        <CardTitle>Color Analysis</CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <ScrollArea className="h-full max-h-48">
-                          <div className="flex flex-wrap gap-2 pb-2">
-                            {colorData.filter(item => item.colorMode === 'dark').map((item, index) => (
-                              <div 
-                                key={index} 
-                                className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
-                                style={{ backgroundColor: item.color }}
-                                title={`Day ${item.day}: ${item.color}`}
-                              />
-                            ))}
-                          </div>
-                        </ScrollArea>
+                      <CardContent className="flex justify-center pb-4">
+                        <div className="text-center p-12 max-w-md">
+                          <p className="text-muted-foreground">
+                            Advanced color analytics will be available in a future update.
+                            This will include color harmony analysis, trend detection, and
+                            color psychology insights.
+                          </p>
+                        </div>
                       </CardContent>
                     </Card>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Light Colors Timeline</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ScrollArea className="h-full max-h-48">
+                            <div className="flex flex-wrap gap-2 pb-2">
+                              {colorData.filter(item => item.colorMode === 'light').map((item, index) => (
+                                <div 
+                                  key={index} 
+                                  className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
+                                  style={{ backgroundColor: item.color }}
+                                  title={`Day ${item.day}: ${item.color}`}
+                                />
+                              ))}
+                            </div>
+                          </ScrollArea>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Dark Colors Timeline</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ScrollArea className="h-full max-h-48">
+                            <div className="flex flex-wrap gap-2 pb-2">
+                              {colorData.filter(item => item.colorMode === 'dark').map((item, index) => (
+                                <div 
+                                  key={index} 
+                                  className="w-8 h-8 rounded-md border cursor-pointer transition-transform hover:scale-110" 
+                                  style={{ backgroundColor: item.color }}
+                                  title={`Day ${item.day}: ${item.color}`}
+                                />
+                              ))}
+                            </div>
+                          </ScrollArea>
+                        </CardContent>
+                      </Card>
+                    </div>
                   </div>
                 </ScrollArea>
               </TabsContent>
               
-              <TabsContent value="timeline">
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold">30-Day Color Timeline</h2>
-                  <ScrollArea className="max-h-[calc(100vh-360px)]">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
-                      {colorData.map((item, index) => (
-                        <Card key={index} className="overflow-hidden">
-                          <div className="h-24" style={{backgroundColor: item.color}}></div>
-                          <CardContent className="p-4">
-                            <h3 className="font-semibold">Day {item.day}</h3>
-                            <div className="mt-2 text-xs">
-                              <div>
-                                <span className="text-muted-foreground">Color: </span>
-                                {item.color}
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Mode: </span>
-                                {item.colorMode}
-                              </div>
-                              {item.note && (
-                                <p className="text-xs mt-2 italic">{item.note}</p>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="analytics">
-                <ScrollArea className="max-h-[calc(100vh-360px)]">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Color Analysis</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex justify-center pb-4">
-                      <div className="text-center p-12 max-w-md">
-                        <p className="text-muted-foreground">
-                          Advanced color analytics will be available in a future update.
-                          This will include color harmony analysis, trend detection, and
-                          color psychology insights.
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
+              <TabsContent value="calendar" className="space-y-6">
+                <ScrollArea className="w-full max-h-[calc(100vh-360px)]">
+                  <ColorChart
+                    data={colorData}
+                  />
                 </ScrollArea>
               </TabsContent>
             </Tabs>
