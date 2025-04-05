@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ChartContainer,
   ChartTooltip,
@@ -119,7 +120,7 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
       </CardHeader>
       <CardContent>
         {viewMode === 'all' ? (
-          <div className="mt-4">
+          <ScrollArea className="h-[400px] mt-4 pr-4">
             {/* Calendar View */}
             <div className="grid grid-cols-7 gap-1">
               {/* Calendar Header - Day Names */}
@@ -174,9 +175,9 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
                 <span className="text-xs">Has Note</span>
               </div>
             </div>
-          </div>
+          </ScrollArea>
         ) : (
-          <div className="h-[400px] mt-4">
+          <ScrollArea className="h-[400px] mt-4 pr-4">
             <ChartContainer config={chartConfig}>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
                 {filteredData.map((item, index) => (
@@ -203,7 +204,7 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
                 ))}
               </div>
             </ChartContainer>
-          </div>
+          </ScrollArea>
         )}
       </CardContent>
     </Card>
