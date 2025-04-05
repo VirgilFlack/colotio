@@ -92,9 +92,14 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
                       <div 
                         className={cn(
                           "absolute inset-4 rounded-md border overflow-hidden cursor-pointer",
-                          colorData.colorMode === 'dark' && "bg-gray-800"
+                          colorData.colorMode === 'dark' && "bg-gray-800 border-gray-700"
                         )}
-                        style={{ backgroundColor: colorData.color }}
+                        style={{ 
+                          backgroundColor: colorData.color,
+                          backgroundImage: colorData.colorMode === 'dark' 
+                            ? 'linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3))' 
+                            : 'none'
+                        }}
                         title={`${colorData.color} (${colorData.colorMode})`}
                       >
                         {colorData.note && (
@@ -113,7 +118,7 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
                 <span className="text-xs">Light Colors</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-gray-800 border border-secondary/50"></div>
+                <div className="w-3 h-3 rounded bg-gray-800 border border-gray-700"></div>
                 <span className="text-xs">Dark Colors</span>
               </div>
               <div className="flex items-center gap-2">
