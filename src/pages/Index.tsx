@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import ColorChart from '@/components/ColorChart';
+import ColorCalendarWidget from '@/components/ColorCalendarWidget';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, PlusCircle, BarChart, LineChart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,7 +24,6 @@ interface UserData {
   colorData: ColorData[];
 }
 
-// Array of positive messages to display randomly
 const positiveMessages = [
   "Today is a great day to explore colors!",
   "Your color choices reflect your unique perspective.",
@@ -243,6 +243,7 @@ const Index = () => {
                 <TabsTrigger value="timeline">Timeline</TabsTrigger>
                 <TabsTrigger value="palette">Color Palette</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                <TabsTrigger value="calendar">Calendar</TabsTrigger>
               </TabsList>
               
               <TabsContent value="overview" className="space-y-6">
@@ -340,6 +341,10 @@ const Index = () => {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+              
+              <TabsContent value="calendar">
+                <ColorCalendarWidget data={colorData} />
               </TabsContent>
             </Tabs>
           ) : (
