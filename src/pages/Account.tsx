@@ -8,11 +8,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { UserCircle, Save, LogOut } from 'lucide-react';
+import { UserCircle, Save, LogOut, Trash2, AlertTriangle } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 const Account = () => {
   const [userName, setUserName] = useState('');
   const [userInitial, setUserInitial] = useState('');
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,6 +42,27 @@ const Account = () => {
     localStorage.removeItem('userName');
     toast.success('Logged out successfully');
     navigate('/');
+  };
+
+  const handleEraseAllData = () => {
+    if (deleteConfirmation.trim() === 'Delete') {
+      // Clear all color data from localStorage
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.includes('color') || key.includes('Color')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      toast.success('All color data has been erased');
+      setShowDeleteDialog(false);
+      setDeleteConfirmation('');
+      
+      // Redirect to dashboard to refresh the view
+      navigate('/dashboard');
+    } else {
+      toast.error('Please type "Delete" to confirm');
+    }
   };
 
   return (
@@ -101,7 +126,7 @@ const Account = () => {
               <CardHeader>
                 <CardTitle>Account Actions</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <Button 
                   variant="destructive" 
                   onClick={handleLogout}
@@ -110,11 +135,56 @@ const Account = () => {
                   <LogOut className="h-4 w-4" />
                   Logout
                 </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2 border-destructive text-destructive hover:bg-destructive/10"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Erase All Color Data
+                </Button>
               </CardContent>
             </Card>
           </div>
         </div>
       </main>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Erase All Color Data
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This action will permanently delete all of your color data. This cannot be undone.
+              <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive">
+                <p className="font-medium">To confirm, type "Delete" in the field below:</p>
+              </div>
+              <div className="mt-4">
+                <Input
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  placeholder='Type "Delete" here'
+                  className="border-destructive/50 focus-visible:ring-destructive"
+                />
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteConfirmation('')}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleEraseAllData}
+              className="bg-destructive hover:bg-destructive/90"
+              disabled={deleteConfirmation !== 'Delete'}
+            >
+              Erase All Data
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
