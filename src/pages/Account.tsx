@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -7,11 +8,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { UserCircle, Save } from 'lucide-react';
+import { UserCircle, Save, LogOut } from 'lucide-react';
 
 const Account = () => {
   const [userName, setUserName] = useState('');
   const [userInitial, setUserInitial] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Load user name from localStorage
@@ -30,6 +32,12 @@ const Account = () => {
     } else {
       toast.error('Please enter a valid name');
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('userName');
+    toast.success('Logged out successfully');
+    navigate('/');
   };
 
   return (
@@ -86,6 +94,24 @@ const Account = () => {
                 </CardContent>
               </Card>
             </div>
+          </div>
+          
+          <div className="mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Actions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  variant="destructive" 
+                  onClick={handleLogout}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>
