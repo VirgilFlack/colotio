@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/chart";
 import { format, addDays, startOfMonth, getDaysInMonth } from 'date-fns';
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
 
 interface ColorChartProps {
   title?: string;
@@ -23,6 +25,8 @@ interface ColorChartProps {
 }
 
 const ColorChart = ({ title, data, className }: ColorChartProps) => {
+  const [scrollToBottom, setScrollToBottom] = useState(false);
+  
   // Get current month data for calendar view
   const currentDate = new Date();
   const startOfCurrentMonth = startOfMonth(currentDate);
@@ -69,15 +73,34 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
     }
   };
   
+  // Handle scroll to bottom
+  const handleScrollToBottom = () => {
+    const scrollArea = document.querySelector('.color-chart-scroll-area');
+    if (scrollArea) {
+      scrollArea.scrollTo({
+        top: scrollArea.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+  
   return (
     <Card className={className}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">{title || currentMonthName}</CardTitle>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="gap-1 text-xs" 
+            onClick={handleScrollToBottom}
+          >
+            View Color Tiles <ChevronDown className="h-3 w-3" />
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[380px] mt-4 pr-4">
+        <ScrollArea className="h-[380px] mt-4 pr-4 color-chart-scroll-area">
           <div className="pb-4">
             {/* Calendar View */}
             <div className="grid grid-cols-7 gap-1">
@@ -136,40 +159,51 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
                 <span className="text-xs">Has Note</span>
               </div>
             </div>
+            
+            <div className="flex justify-center my-6">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-1 text-xs"
+                onClick={handleScrollToBottom}
+              >
+                Color Tiles Below <ChevronDown className="h-3 w-3" />
+              </Button>
+            </div>
+
+            <ChartContainer config={chartConfig}>
+              <ScrollArea className="max-h-[300px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6 pb-4">
+                  {data.map((item, index) => (
+                    <div key={index} className="p-2 border rounded-md">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="text-sm font-medium">Day {item.day}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {format(addDays(startOfCurrentMonth, item.day - 1), 'MMM d')}
+                        </div>
+                      </div>
+                      <div 
+                        className={cn(
+                          "h-24 w-full rounded-md border",
+                          item.colorMode === 'dark' && "bg-gray-800"
+                        )}
+                        style={{ backgroundColor: item.color }}
+                      ></div>
+                      <div className="mt-2">
+                        <p className="text-xs">{item.color} ({item.colorMode})</p>
+                        {item.note && (
+                          <p className="text-xs italic mt-1 truncate" title={item.note}>
+                            {item.note}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </ChartContainer>
           </div>
         </ScrollArea>
-
-        <ChartContainer config={chartConfig}>
-          <ScrollArea className="max-h-[300px]">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6 pb-4">
-              {data.map((item, index) => (
-                <div key={index} className="p-2 border rounded-md">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="text-sm font-medium">Day {item.day}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {format(addDays(startOfCurrentMonth, item.day - 1), 'MMM d')}
-                    </div>
-                  </div>
-                  <div 
-                    className={cn(
-                      "h-24 w-full rounded-md border",
-                      item.colorMode === 'dark' && "bg-gray-800"
-                    )}
-                    style={{ backgroundColor: item.color }}
-                  ></div>
-                  <div className="mt-2">
-                    <p className="text-xs">{item.color} ({item.colorMode})</p>
-                    {item.note && (
-                      <p className="text-xs italic mt-1 truncate" title={item.note}>
-                        {item.note}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-        </ChartContainer>
       </CardContent>
     </Card>
   );
