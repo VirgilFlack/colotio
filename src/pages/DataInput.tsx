@@ -61,11 +61,11 @@ const dataSchema = z.object({
   colorData: z.array(
     z.object({
       day: z.number().min(1).max(30),
-      color: z.string(),
-      colorMode: z.enum(['light', 'dark']),
+      color: z.string().optional(),
+      colorMode: z.enum(['light', 'dark']).optional(),
       note: z.string().optional(),
     })
-  ).length(30, { message: "Must provide data for all 30 days" }),
+  ).optional(),
 });
 
 type FormData = z.infer<typeof dataSchema>;
@@ -81,9 +81,6 @@ const DataInput = () => {
 
   const initialColorData = Array.from({ length: 30 }, (_, i) => ({
     day: i + 1,
-    color: ALLOWED_COLORS.Blue,
-    colorMode: 'light' as const,
-    note: "",
   }));
   
   const [colorData, setColorData] = useState(initialColorData);
@@ -103,16 +100,16 @@ const DataInput = () => {
       try {
         const parsedData = JSON.parse(userData);
         if (parsedData.colorData && Array.isArray(parsedData.colorData)) {
-          const formattedData = parsedData.colorData.map((item: any) => {
-            if (item.lightColor && item.darkColor) {
-              return {
-                day: item.day,
-                color: item.lightColor,
-                colorMode: 'light' as const,
-                note: item.note || '',
-              };
-            }
-            return item;
+          const formattedData = Array.from({ length: 30 }, (_, i) => {
+            const day = i + 1;
+            const existingData = parsedData.colorData.find((item: any) => item.day === day);
+            
+            return {
+              day,
+              ...(existingData?.color && { color: existingData.color }),
+              ...(existingData?.colorMode && { colorMode: existingData.colorMode }),
+              ...(existingData?.note && { note: existingData.note }),
+            };
           });
           
           setColorData(formattedData);
@@ -131,16 +128,44 @@ const DataInput = () => {
   const onSubmit = (data: FormData) => {
     data.datasetName = defaultDatasetName;
     
-    localStorage.setItem("userData", JSON.stringify(data));
+    const cleanedColorData = data.colorData?.map(day => {
+      const hasColorData = day.color && day.colorMode;
+      
+      if (hasColorData) {
+        return {
+          day: day.day,
+          color: day.color,
+          colorMode: day.colorMode,
+          ...(day.note && { note: day.note }),
+        };
+      } else {
+        return { day: day.day };
+      }
+    }) || [];
+    
+    const dataToSave = {
+      ...data,
+      colorData: cleanedColorData,
+    };
+    
+    localStorage.setItem("userData", JSON.stringify(dataToSave));
     toast.success("Color data saved successfully");
     navigate("/dashboard");
   };
 
   const updateColorData = (day: number, field: string, value: string | 'light' | 'dark') => {
     const updated = [...colorData];
-    updated[day - 1] = { ...updated[day - 1], [field]: value };
-    setColorData(updated);
-    form.setValue("colorData", updated);
+    const dayIndex = updated.findIndex(item => item.day === day);
+    
+    if (dayIndex !== -1) {
+      updated[dayIndex] = { 
+        ...updated[dayIndex], 
+        [field]: value 
+      };
+      
+      setColorData(updated);
+      form.setValue("colorData", updated);
+    }
   };
 
   const getColorNameFromHex = (hexValue: string) => {
@@ -428,10 +453,15 @@ const DataInput = () => {
                           <div className="space-y-4">
                             <FormLabel htmlFor={`color-${currentDay}`}>Color</FormLabel>
                             <div className="flex items-center gap-3">
-                              <ColorSwatch color={colorData[currentDay - 1]?.color || "#0000FF"} />
+                              <ColorSwatch color={colorData[currentDay - 1]?.color || "#FFFFFF"} />
                               <Select
-                                value={getColorNameFromHex(colorData[currentDay - 1]?.color) || "Blue"}
-                                onValueChange={(value) => updateColorData(currentDay, "color", ALLOWED_COLORS[value as keyof typeof ALLOWED_COLORS])}
+                                value={getColorNameFromHex(colorData[currentDay - 1]?.color as string) || ""}
+                                onValueChange={(value) => {
+                                  updateColorData(currentDay, "color", ALLOWED_COLORS[value as keyof typeof ALLOWED_COLORS]);
+                                  if (!colorData[currentDay - 1]?.colorMode) {
+                                    updateColorData(currentDay, "colorMode", "light");
+                                  }
+                                }}
                               >
                                 <SelectTrigger className="w-full">
                                   <SelectValue placeholder="Select a color" />
@@ -456,7 +486,7 @@ const DataInput = () => {
                           <div className="space-y-2">
                             <FormLabel>Color Mode</FormLabel>
                             <RadioGroup 
-                              value={colorData[currentDay - 1]?.colorMode || "light"}
+                              value={colorData[currentDay - 1]?.colorMode || ""}
                               onValueChange={(value) => updateColorData(
                                 currentDay, 
                                 "colorMode", 
@@ -497,10 +527,15 @@ const DataInput = () => {
                               <div className="flex items-center gap-2">
                                 <FormLabel className="min-w-16 text-xs">Color:</FormLabel>
                                 <div className="flex items-center gap-2">
-                                  <ColorSwatch color={day.color} />
+                                  <ColorSwatch color={day.color || "#FFFFFF"} />
                                   <Select
-                                    value={getColorNameFromHex(day.color) || "Blue"}
-                                    onValueChange={(value) => updateColorData(day.day, "color", ALLOWED_COLORS[value as keyof typeof ALLOWED_COLORS])}
+                                    value={getColorNameFromHex(day.color as string) || ""}
+                                    onValueChange={(value) => {
+                                      updateColorData(day.day, "color", ALLOWED_COLORS[value as keyof typeof ALLOWED_COLORS]);
+                                      if (!day.colorMode) {
+                                        updateColorData(day.day, "colorMode", "light");
+                                      }
+                                    }}
                                   >
                                     <SelectTrigger className="h-8 text-xs">
                                       <SelectValue placeholder="Select a color" />
@@ -526,7 +561,7 @@ const DataInput = () => {
                                 <FormLabel className="min-w-16 text-xs">Mode:</FormLabel>
                                 <div className="flex items-center gap-2">
                                   <RadioGroup 
-                                    value={day.colorMode}
+                                    value={day.colorMode || ""}
                                     onValueChange={(value) => updateColorData(
                                       day.day, 
                                       "colorMode", 

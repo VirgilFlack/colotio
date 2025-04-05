@@ -11,8 +11,8 @@ interface ColorChartProps {
     day: number;
     lightColor?: string;
     darkColor?: string;
-    color: string;
-    colorMode: 'light' | 'dark';
+    color?: string;
+    colorMode?: 'light' | 'dark';
     note?: string;
   }>;
   className?: string;
@@ -45,7 +45,12 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
   
   // Find color data for a specific day
   const getColorForDay = (day: number) => {
-    return data.find(item => item.day === day);
+    const dayData = data.find(item => item.day === day);
+    // Only return the data if it has a color and colorMode
+    if (dayData && dayData.color && dayData.colorMode) {
+      return dayData;
+    }
+    return null;
   };
   
   // Day names for the calendar header
