@@ -88,7 +88,7 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
                     className="aspect-square border rounded-md p-1 relative hover:bg-muted/30 transition-colors"
                   >
                     <div className="text-xs font-medium absolute top-1 left-1">{day}</div>
-                    {colorData && (
+                    {colorData ? (
                       <div 
                         className={cn(
                           "absolute inset-4 rounded-md border overflow-hidden cursor-pointer",
@@ -105,6 +105,10 @@ const ColorChart = ({ title, data, className }: ColorChartProps) => {
                         {colorData.note && (
                           <div className="absolute bottom-0 right-0 w-2 h-2 bg-primary rounded-full m-0.5"></div>
                         )}
+                      </div>
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-xs text-muted-foreground">No data</span>
                       </div>
                     )}
                   </div>
