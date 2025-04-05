@@ -141,7 +141,10 @@ const ColorCalendarWidget = ({ data, className }: ColorCalendarWidgetProps) => {
                       {items.slice(0, 4).map((item, i) => (
                         <div 
                           key={i}
-                          className="w-6 h-6 rounded-full border-2 border-background" 
+                          className={cn(
+                            "w-6 h-6 rounded-full border-2 border-background",
+                            item.colorMode === 'dark' && "bg-gray-800"
+                          )}
                           style={{ backgroundColor: item.color }}
                           title={`${item.color} (${item.colorMode})`}
                         />
@@ -170,7 +173,10 @@ const ColorCalendarWidget = ({ data, className }: ColorCalendarWidgetProps) => {
                               {colorData ? (
                                 <div>
                                   <div 
-                                    className="h-8 w-full rounded-md border" 
+                                    className={cn(
+                                      "h-8 w-full rounded-md border",
+                                      colorData.colorMode === 'dark' && "bg-gray-800"
+                                    )}
                                     style={{ backgroundColor: colorData.color }}
                                   />
                                   <div className="mt-1 text-xs">{colorData.color}</div>
