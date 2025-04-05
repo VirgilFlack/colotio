@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Menu, Search, Bell, UserCircle, PlusCircle, Calendar } from 'lucide-react';
+import { Menu, Search, Bell, PlusCircle, Calendar } from 'lucide-react';
 import { 
   Sheet, 
   SheetContent, 
@@ -8,12 +8,14 @@ import {
 } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [searchValue, setSearchValue] = useState('');
   const [userName, setUserName] = useState('');
+  const [userInitial, setUserInitial] = useState('');
   const isMobile = useIsMobile();
   const navigate = useNavigate();
 
@@ -21,6 +23,7 @@ const Navbar = () => {
     const storedName = localStorage.getItem('userName');
     if (storedName) {
       setUserName(storedName);
+      setUserInitial(storedName.charAt(0).toUpperCase());
     }
   }, []);
 
@@ -98,7 +101,11 @@ const Navbar = () => {
             className="flex items-center gap-2"
             onClick={handleUserButtonClick}
           >
-            <UserCircle className="h-5 w-5" />
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-primary/10 text-primary">
+                {userInitial || 'U'}
+              </AvatarFallback>
+            </Avatar>
             {userName && <span className="text-sm hidden sm:inline-block">{userName}</span>}
           </Button>
         </div>
