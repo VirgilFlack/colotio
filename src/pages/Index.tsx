@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -213,7 +214,7 @@ const Index = () => {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold mb-2">Help</h2>
-                    <p className="text-muted-foreground">Get assistance and learn how to use the app</p>
+                    <p className="text-muted-foreground">Access mental health resources and therapy services</p>
                   </div>
                 </div>
               </Card>
