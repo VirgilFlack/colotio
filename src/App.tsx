@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -7,7 +6,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import Index from "./pages/Index";
 import DataInput from "./pages/DataInput";
-import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
 import Welcome from "./pages/Welcome";
 import Account from "./pages/Account";
@@ -82,7 +80,6 @@ const App = () => {
               <Route path="/" element={<Welcome />} />
               <Route path="/dashboard" element={<Index />} />
               <Route path="/data-input" element={<DataInput />} />
-              <Route path="/calendar" element={<Calendar />} />
               <Route path="/account" element={<Account />} />
               <Route path="/help" element={<Help />} />
               <Route path="/monthly-report" element={<MonthlyReport />} />

@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import ColorChart from '@/components/ColorChart';
-import { PlusCircle, Calendar, HelpCircle } from 'lucide-react';
+import { PlusCircle, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -97,7 +98,7 @@ const Index = () => {
   
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'userData' || e.key === null || e.key.includes('color') || e.key.includes('Color')) {
+      if (e.key === 'userData' || e.key === null || e.key?.includes('color') || e.key?.includes('Color')) {
         loadColorData(selectedMonth);
       }
     };
@@ -134,10 +135,6 @@ const Index = () => {
     navigate('/data-input');
   };
   
-  const goToCalendar = () => {
-    navigate('/calendar');
-  };
-  
   const goToHelp = () => {
     navigate('/help');
   };
@@ -162,7 +159,7 @@ const Index = () => {
               </Button>
               {hasData && (
                 <Button onClick={handleGenerateReport} className="gap-2">
-                  <Calendar className="h-4 w-4" />
+                  <PlusCircle className="h-4 w-4" />
                   Generate Report
                 </Button>
               )}
@@ -170,7 +167,7 @@ const Index = () => {
           </div>
           
           <ScrollArea className="w-full">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-4">
               <Card 
                 className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in"
                 onClick={goToDataInput}
@@ -182,21 +179,6 @@ const Index = () => {
                   <div>
                     <h2 className="text-xl font-bold mb-2">Data Input</h2>
                     <p className="text-muted-foreground">Add or edit your color collection data</p>
-                  </div>
-                </div>
-              </Card>
-              
-              <Card 
-                className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in [animation-delay:100ms]"
-                onClick={goToCalendar}
-              >
-                <div className="flex flex-col items-center justify-center h-full space-y-4 p-6">
-                  <div className="p-4 rounded-full bg-primary/10">
-                    <Calendar className="h-12 w-12 text-primary" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold mb-2">Calendar View</h2>
-                    <p className="text-muted-foreground">See your color data in a calendar format</p>
                   </div>
                 </div>
               </Card>
@@ -225,7 +207,7 @@ const Index = () => {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center p-12 border border-dashed rounded-lg mt-8">
-              <Calendar className="h-16 w-16 text-muted-foreground/50 mb-4" />
+              <PlusCircle className="h-16 w-16 text-muted-foreground/50 mb-4" />
               <h2 className="text-xl font-medium mb-2">No color data available</h2>
               <p className="text-muted-foreground text-center max-w-md mb-6">
                 You haven't added any color data yet. Add your 30-day color collection to generate visualizations and insights.
