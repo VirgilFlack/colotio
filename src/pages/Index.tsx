@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -65,7 +64,6 @@ const Index = () => {
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'MMMM yyyy'));
   
-  // Generate last 12 months as options
   const monthOptions = Array.from({ length: 12 }, (_, i) => {
     const date = subMonths(new Date(), i);
     return format(date, 'MMMM yyyy');
@@ -156,13 +154,13 @@ const Index = () => {
 
   const generateMonthlyReport = () => {
     setReportDialogOpen(false);
-    toast.success(`Generating color report for ${selectedMonth}. It will be ready shortly.`, {
-      description: "You'll receive a notification when it's complete.",
-      duration: 5000,
-    });
     
-    // Here you would typically filter data for the selected month
-    // and then generate a report with that data
+    navigate(`/monthly-report?month=${encodeURIComponent(selectedMonth)}`);
+    
+    toast.success(`Generating color report for ${selectedMonth}`, {
+      description: "Preparing your monthly color visualization.",
+      duration: 3000,
+    });
   };
 
   const goToDataInput = () => {

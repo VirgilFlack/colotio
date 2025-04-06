@@ -11,7 +11,8 @@ import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
 import Welcome from "./pages/Welcome";
 import Account from "./pages/Account";
-import Help from "./pages/Help"; // Import the new Help component
+import Help from "./pages/Help";
+import MonthlyReport from "./pages/MonthlyReport"; // Import the new MonthlyReport component
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => {
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/account" element={<Account />} />
               <Route path="/help" element={<Help />} />
+              <Route path="/monthly-report" element={<MonthlyReport />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
