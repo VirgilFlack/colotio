@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface ColorData {
@@ -17,19 +16,23 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
   // Sort color data by day to ensure chronological order
   const sortedColorData = [...colorData].sort((a, b) => a.day - b.day);
   
-  // Define leaf positions in a left-to-right pattern
+  // Define leaf positions following the natural branch structure of the tree
   // Each position represents [x%, y%] coordinates relative to the container
   const leafPositions = [
-    // Left side (early month)
-    [20, 30], [15, 35], [25, 40], [20, 45], [15, 50], [25, 55], [20, 60], 
-    // Left-middle
-    [30, 25], [35, 30], [30, 35], [35, 40], [30, 45], [35, 50], [30, 55],
-    // Middle section
-    [40, 20], [45, 25], [50, 30], [45, 35], [50, 40], [45, 45], [50, 50], [45, 55],
-    // Right-middle
-    [60, 25], [65, 30], [60, 35], [65, 40], [60, 45], [65, 50], [60, 55],
-    // Right side (late month)
-    [70, 30], [75, 35], [70, 40], [75, 45], [70, 50], [75, 55], [70, 60],
+    // Left branch (early month)
+    [25, 25], [20, 30], [23, 35], [18, 40], [22, 45], [19, 50], [24, 55],
+    
+    // Left-middle branch
+    [35, 22], [32, 28], [37, 34], [33, 40], [38, 46], [34, 52], [39, 58],
+    
+    // Center branch (mid-month)
+    [50, 15], [48, 22], [52, 28], [47, 35], [51, 42], [49, 48], [53, 55],
+    
+    // Right-middle branch
+    [63, 22], [60, 28], [65, 34], [62, 40], [67, 46], [63, 52], [68, 58],
+    
+    // Right branch (late month)
+    [75, 25], [72, 30], [77, 35], [73, 40], [78, 45], [74, 50], [79, 55],
   ];
 
   return (
@@ -53,9 +56,9 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
             // Skip if no position (shouldn't happen with our array, but just in case)
             if (!position) return null;
             
-            // Random size for variety but consistent with day number
+            // Adjust size based on day but keep within reasonable limits
             // Earlier days will have slightly smaller leaves
-            const size = 20 + (data.day / 30) * 10; // Size from 20-30px based on day
+            const size = 16 + (data.day / 31) * 12; // Size from 16-28px based on day
             
             return (
               <div 
@@ -68,8 +71,8 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
                   height: `${size}px`,
                   backgroundColor: data.color,
                   filter: data.colorMode === 'dark' ? 'brightness(0.8)' : 'none',
-                  // Slight random rotation for natural look
-                  transform: `rotate(${Math.floor(Math.random() * 60) - 30}deg)`,
+                  // Slight random rotation for natural look, but keep it subtle
+                  transform: `rotate(${Math.floor(Math.random() * 40) - 20}deg)`,
                   // Animate in with delay based on day number for chronological appearance
                   animation: 'fade-in 0.5s ease-out forwards',
                   animationDelay: `${data.day * 0.05}s`,
