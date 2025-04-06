@@ -23,15 +23,7 @@ import {
   DialogClose
 } from "@/components/ui/dialog";
 import { format, subMonths } from 'date-fns';
-
-interface ColorData {
-  day: number;
-  color: string;
-  colorMode: 'light' | 'dark';
-  note?: string;
-  lightColor?: string;
-  darkColor?: string;
-}
+import { ColorData, sampleAprilData } from '@/utils/sampleData';
 
 interface UserData {
   datasetName: string;
@@ -88,6 +80,16 @@ const Index = () => {
       try {
         const parsedData: UserData = JSON.parse(userData);
         
+        // Use April 2025 sample data if we're in the current month (for demo purposes)
+        const currentMonthName = format(new Date(), 'MMMM yyyy');
+        if (currentMonthName === 'April 2025' && (!parsedData.colorData || parsedData.colorData.length === 0)) {
+          setColorData(sampleAprilData);
+          setDatasetName('April 2025 Colors');
+          setDescription('Sample color data for April 2025');
+          setHasData(true);
+          return;
+        }
+        
         const processedColorData = parsedData.colorData?.map(item => {
           if ('lightColor' in item || 'darkColor' in item) {
             if (item.lightColor) {
@@ -107,7 +109,7 @@ const Index = () => {
             }
           }
           return item;
-        });
+        }).sort((a, b) => a.day - b.day); // Sort by day
         
         setColorData(processedColorData || []);
         setDatasetName(parsedData.datasetName || '');
@@ -121,10 +123,19 @@ const Index = () => {
         setHasData(false);
       }
     } else {
-      setColorData([]);
-      setDatasetName('');
-      setDescription('');
-      setHasData(false);
+      // If no data is found in localStorage, use sample data for April 2025
+      const currentMonthName = format(new Date(), 'MMMM yyyy');
+      if (currentMonthName === 'April 2025') {
+        setColorData(sampleAprilData);
+        setDatasetName('April 2025 Colors');
+        setDescription('Sample color data for April 2025');
+        setHasData(true);
+      } else {
+        setColorData([]);
+        setDatasetName('');
+        setDescription('');
+        setHasData(false);
+      }
     }
   };
   
