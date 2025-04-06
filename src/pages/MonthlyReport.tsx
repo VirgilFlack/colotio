@@ -4,7 +4,6 @@ import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from 'lucide-react';
-import ColorFadeCircle from '@/components/ColorFadeCircle';
 import ColorTree from '@/components/ColorTree';
 import { parse, format } from 'date-fns';
 
@@ -176,15 +175,6 @@ const MonthlyReport = () => {
                 </CardHeader>
                 <CardContent className="flex justify-center">
                   <ColorTree colorData={colorData} month={selectedMonth} />
-                </CardContent>
-              </Card>
-              
-              <Card className="col-span-1 md:col-span-2">
-                <CardHeader>
-                  <CardTitle>Color Progression Circle</CardTitle>
-                </CardHeader>
-                <CardContent className="flex justify-center">
-                  <ColorFadeCircle colorData={colorData} month={selectedMonth} />
                 </CardContent>
               </Card>
               
