@@ -1,8 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -194,10 +192,8 @@ const DataInput = () => {
     />
   );
 
-  // Generate array of days 1-30 for the dropdown
   const days = Array.from({ length: 30 }, (_, i) => i + 1);
 
-  // Filter color data to get only days with colors
   const daysWithColors = colorData.filter(day => day.color && day.colorMode);
 
   return (
@@ -459,7 +455,7 @@ const DataInput = () => {
                         <div className="py-4">
                           {daysWithColors.length === 0 ? (
                             <p className="text-muted-foreground text-center py-8">
-                              No color data recorded yet. Start by selecting a day and adding a color.
+                              No color data recorded yet. Select a day and add colors to see them here.
                             </p>
                           ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
