@@ -39,6 +39,9 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
   
   // Function to determine if a color is light
   const isLightColor = (color: string): boolean => {
+    // Add null/undefined check to prevent the error
+    if (!color) return false;
+    
     // If it's a hex color
     if (color.startsWith('#')) {
       let hex = color.substring(1);
@@ -84,6 +87,9 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
             
             // Skip if no position (shouldn't happen with our array, but just in case)
             if (!position) return null;
+            
+            // Skip if no color data (defensive programming)
+            if (!data.color) return null;
             
             // Adjust size based on day but keep within reasonable limits
             // Earlier days will have slightly smaller leaves
