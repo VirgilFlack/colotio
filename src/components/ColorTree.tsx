@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { cn } from "@/lib/utils";
 
 interface ColorData {
   day: number;
@@ -35,6 +36,32 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
     // Right branch (late month)
     [75, 25], [72, 30], [77, 35], [73, 40], [78, 45], [74, 50], [79, 55],
   ];
+  
+  // Function to determine if a color is light
+  const isLightColor = (color: string): boolean => {
+    // If it's a hex color
+    if (color.startsWith('#')) {
+      let hex = color.substring(1);
+      
+      // Convert 3-digit hex to 6-digit
+      if (hex.length === 3) {
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+      }
+      
+      // Convert hex to RGB
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      
+      // Calculate perceived brightness
+      // Formula: (R * 0.299 + G * 0.587 + B * 0.114) > 186 is light color
+      return (r * 0.299 + g * 0.587 + b * 0.114) > 186;
+    }
+    
+    // For simple named colors like "white", "ivory", etc.
+    const lightColors = ['white', 'ivory', 'snow', 'ghostwhite', 'aliceblue', 'azure', 'mintcream'];
+    return lightColors.includes(color.toLowerCase());
+  };
 
   return (
     <div className="relative flex flex-col items-center py-8">
@@ -61,10 +88,16 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
             // Earlier days will have slightly smaller leaves
             const size = 16 + (data.day / 31) * 12; // Size from 16-28px based on day
             
+            // Determine if this is a light color that needs a border
+            const needsBorder = isLightColor(data.color);
+            
             return (
               <div 
                 key={`leaf-${data.day}`}
-                className="absolute rounded-full shadow-sm transform transition-all duration-700 hover:scale-110"
+                className={cn(
+                  "absolute rounded-full shadow-sm transform transition-all duration-700 hover:scale-110",
+                  needsBorder && "border border-black dark:border-white"
+                )}
                 style={{
                   left: `${position[0]}%`,
                   top: `${position[1]}%`,
