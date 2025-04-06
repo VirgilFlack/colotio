@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import ColorChart from '@/components/ColorChart';
-import { PlusCircle, HelpCircle } from 'lucide-react';
+import { PlusCircle, HelpCircle, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -139,6 +138,10 @@ const Index = () => {
     navigate('/help');
   };
   
+  const goToColorTheory = () => {
+    navigate('/color-theory');
+  };
+  
   return (
     <div className="min-h-screen bg-background overflow-hidden overflow-x-hidden">
       <Navbar />
@@ -167,7 +170,7 @@ const Index = () => {
           </div>
           
           <ScrollArea className="w-full">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pb-4">
               <Card 
                 className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in"
                 onClick={goToDataInput}
@@ -179,6 +182,21 @@ const Index = () => {
                   <div>
                     <h2 className="text-xl font-bold mb-2">Data Input</h2>
                     <p className="text-muted-foreground">Add or edit your color collection data</p>
+                  </div>
+                </div>
+              </Card>
+              
+              <Card 
+                className="aspect-square border-2 hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center animate-fade-in [animation-delay:100ms]"
+                onClick={goToColorTheory}
+              >
+                <div className="flex flex-col items-center justify-center h-full space-y-4 p-6">
+                  <div className="p-4 rounded-full bg-primary/10">
+                    <Palette className="h-12 w-12 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold mb-2">Color Theory</h2>
+                    <p className="text-muted-foreground">Learn about emotional color theory and what each color represents</p>
                   </div>
                 </div>
               </Card>

@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -11,6 +12,7 @@ import Welcome from "./pages/Welcome";
 import Account from "./pages/Account";
 import Help from "./pages/Help";
 import MonthlyReport from "./pages/MonthlyReport";
+import ColorTheory from "./pages/ColorTheory";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -82,6 +84,7 @@ const App = () => {
               <Route path="/data-input" element={<DataInput />} />
               <Route path="/account" element={<Account />} />
               <Route path="/help" element={<Help />} />
+              <Route path="/color-theory" element={<ColorTheory />} />
               <Route path="/monthly-report" element={<MonthlyReport />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

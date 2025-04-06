@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Menu, Search, Bell, PlusCircle, HelpCircle } from 'lucide-react';
+import { Menu, Search, Bell, PlusCircle, HelpCircle, Palette } from 'lucide-react';
 import { 
   Sheet, 
   SheetContent, 
@@ -65,6 +65,7 @@ const Navbar = () => {
                 <nav className="flex flex-col gap-4 mt-8">
                   <Link to="/dashboard" className="text-lg font-medium hover:text-accent">Dashboard</Link>
                   <Link to="/data-input" className="text-lg font-medium hover:text-accent">Data Input</Link>
+                  <Link to="/color-theory" className="text-lg font-medium hover:text-accent">Color Theory</Link>
                   <Link to="/help" className="text-lg font-medium hover:text-accent">Help</Link>
                   <Link to="/account" className="text-lg font-medium hover:text-accent">Account</Link>
                 </nav>
@@ -101,6 +102,12 @@ const Navbar = () => {
                 <Link to="/data-input" className="flex items-center gap-2">
                   <PlusCircle className="h-4 w-4" />
                   Data Input
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/color-theory" className="flex items-center gap-2">
+                  <Palette className="h-4 w-4" />
+                  Color Theory
                 </Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
