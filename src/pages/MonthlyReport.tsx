@@ -27,6 +27,27 @@ const MonthlyReport = () => {
     
     setSelectedMonth(month);
     loadColorData(month);
+    
+    // Setup event listeners for data changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'userData' || e.key === null || e.key.includes('color') || e.key.includes('Color')) {
+        loadColorData(month);
+      }
+    };
+    
+    const handleDataErased = () => {
+      loadColorData(month);
+      // Redirect to dashboard if data is erased while viewing the report
+      navigate('/dashboard');
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('colorDataErased', handleDataErased);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('colorDataErased', handleDataErased);
+    };
   }, [location, navigate]);
   
   const loadColorData = (month: string) => {

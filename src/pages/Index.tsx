@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -99,16 +100,18 @@ const Index = () => {
   };
   
   useEffect(() => {
+    // Handle storage changes across tabs or through direct localStorage manipulation
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'userData' || e.key === null || e.key.includes('color') || e.key.includes('Color')) {
         loadColorData(selectedMonth);
       }
     };
-
     window.addEventListener('storage', handleStorageChange);
     
+    // Handle data erased event (dispatched from Account page)
     const handleDataErased = () => {
       loadColorData(selectedMonth);
+      setHasData(false);
     };
     window.addEventListener('colorDataErased', handleDataErased);
 

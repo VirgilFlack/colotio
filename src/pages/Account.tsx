@@ -61,8 +61,11 @@ const Account = () => {
       setShowDeleteDialog(false);
       setDeleteConfirmation('');
       
-      // Dispatch a custom event to notify the dashboard
+      // Dispatch custom events to notify all components about data deletion
       window.dispatchEvent(new Event('colorDataErased'));
+      
+      // Force refresh of all components that might be showing color data
+      window.dispatchEvent(new StorageEvent('storage', { key: 'userData' }));
       
       // Redirect to dashboard to refresh the view
       navigate('/dashboard');

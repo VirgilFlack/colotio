@@ -32,8 +32,8 @@ const CalendarPage = () => {
   const [datasetName, setDatasetName] = useState<string>('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Load color data from localStorage
+  // Function to load color data from localStorage
+  const loadColorData = () => {
     const userData = localStorage.getItem('userData');
     
     if (userData) {
@@ -67,8 +67,37 @@ const CalendarPage = () => {
         setDatasetName(parsedData.datasetName || '');
       } catch (e) {
         console.error('Error parsing stored data', e);
+        setColorData([]);
       }
+    } else {
+      // No user data found
+      setColorData([]);
     }
+  };
+
+  useEffect(() => {
+    // Initial load
+    loadColorData();
+    
+    // Listen for storage changes (in case data is changed in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'userData' || e.key === null || e.key.includes('color') || e.key.includes('Color')) {
+        loadColorData();
+      }
+    };
+    
+    // Listen for the custom event when data is erased
+    const handleDataErased = () => {
+      loadColorData();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('colorDataErased', handleDataErased);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('colorDataErased', handleDataErased);
+    };
   }, []);
 
   return (
