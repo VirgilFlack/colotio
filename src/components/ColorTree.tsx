@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 interface ColorData {
@@ -37,7 +38,7 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
 
   return (
     <div className="relative flex flex-col items-center py-8">
-      <h3 className="text-lg font-medium mb-6">Color Tree for {month}</h3>
+      <h3 className="text-lg font-medium mb-6">Color Visualization for {month}</h3>
       
       <div className="relative w-full max-w-2xl h-[600px] flex justify-center">
         {/* Tree base image */}

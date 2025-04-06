@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -78,7 +79,7 @@ const MonthlyReport = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="col-span-1 md:col-span-2">
                 <CardHeader>
-                  <CardTitle>Color Tree Visualization</CardTitle>
+                  <CardTitle>Color Visualization</CardTitle>
                 </CardHeader>
                 <CardContent className="flex justify-center">
                   <ColorTree colorData={colorData} month={selectedMonth} />
