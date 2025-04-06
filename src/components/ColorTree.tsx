@@ -14,22 +14,22 @@ interface ColorTreeProps {
 }
 
 const ColorTree = ({ colorData, month }: ColorTreeProps) => {
-  // Define leaf positions - these are approximate positions for leaves on the tree
+  // Sort color data by day to ensure chronological order
+  const sortedColorData = [...colorData].sort((a, b) => a.day - b.day);
+  
+  // Define leaf positions in a left-to-right pattern
   // Each position represents [x%, y%] coordinates relative to the container
   const leafPositions = [
-    // Top section
-    [50, 10], [45, 15], [55, 15], [40, 20], [60, 20],
-    // Upper middle section
-    [35, 25], [45, 25], [55, 25], [65, 25], [30, 30], [40, 30], [50, 30], [60, 30], [70, 30],
+    // Left side (early month)
+    [20, 30], [15, 35], [25, 40], [20, 45], [15, 50], [25, 55], [20, 60], 
+    // Left-middle
+    [30, 25], [35, 30], [30, 35], [35, 40], [30, 45], [35, 50], [30, 55],
     // Middle section
-    [25, 35], [35, 35], [45, 35], [55, 35], [65, 35], [75, 35],
-    [30, 40], [40, 40], [50, 40], [60, 40], [70, 40],
-    // Lower middle section
-    [25, 45], [35, 45], [45, 45], [55, 45], [65, 45], [75, 45],
-    [20, 50], [30, 50], [40, 50], [50, 50], [60, 50], [70, 50], [80, 50],
-    // Bottom section - branches extending wider
-    [15, 55], [25, 55], [35, 55], [45, 55], [55, 55], [65, 55], [75, 55], [85, 55],
-    [20, 60], [30, 60], [40, 60], [50, 60], [60, 60], [70, 60], [80, 60],
+    [40, 20], [45, 25], [50, 30], [45, 35], [50, 40], [45, 45], [50, 50], [45, 55],
+    // Right-middle
+    [60, 25], [65, 30], [60, 35], [65, 40], [60, 45], [65, 50], [60, 55],
+    // Right side (late month)
+    [70, 30], [75, 35], [70, 40], [75, 45], [70, 50], [75, 55], [70, 60],
   ];
 
   return (
@@ -44,17 +44,18 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
           className="h-full object-contain"
         />
 
-        {/* Overlay leaves on the tree based on color data */}
+        {/* Overlay leaves on the tree based on color data in chronological order */}
         <div className="absolute inset-0 pointer-events-none">
-          {colorData.map((data, index) => {
+          {sortedColorData.map((data, index) => {
             // If we have more data than positions, loop around
             const position = leafPositions[index % leafPositions.length];
             
             // Skip if no position (shouldn't happen with our array, but just in case)
             if (!position) return null;
             
-            // Random size for variety
-            const size = Math.floor(Math.random() * 10) + 20; // 20-30px
+            // Random size for variety but consistent with day number
+            // Earlier days will have slightly smaller leaves
+            const size = 20 + (data.day / 30) * 10; // Size from 20-30px based on day
             
             return (
               <div 
@@ -69,10 +70,10 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
                   filter: data.colorMode === 'dark' ? 'brightness(0.8)' : 'none',
                   // Slight random rotation for natural look
                   transform: `rotate(${Math.floor(Math.random() * 60) - 30}deg)`,
-                  // Animate in
+                  // Animate in with delay based on day number for chronological appearance
                   animation: 'fade-in 0.5s ease-out forwards',
-                  // Add slight delay based on index
-                  animationDelay: `${index * 0.05}s`
+                  animationDelay: `${data.day * 0.05}s`,
+                  zIndex: data.day, // Later days appear on top
                 }}
                 title={`Day ${data.day}: ${data.color} (${data.note || 'No note'})`}
               />
@@ -83,8 +84,8 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
       
       <div className="mt-8 text-sm text-muted-foreground">
         <p className="text-center">
-          {colorData.length > 0 
-            ? `Tree with ${colorData.length} leaf colors for ${month}` 
+          {sortedColorData.length > 0 
+            ? `Tree with ${sortedColorData.length} leaf colors for ${month}` 
             : 'A bare tree with no leaves'}
         </p>
       </div>
