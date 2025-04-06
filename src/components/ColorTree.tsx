@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { cn } from "@/lib/utils";
 
@@ -64,7 +65,7 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
     return lightColors.includes(color.toLowerCase());
   };
 
-  // Function to color the tree branches
+  // Function to color the tree branches - enhanced version with better contrast
   const colorTreeBranches = () => {
     if (!treeRef.current || !canvasRef.current || sortedColorData.length === 0) return;
     
@@ -84,21 +85,33 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
     
-    // Section the tree image into rough sections based on the quadrants
+    // Define better section distribution for more complete tree coloring
     const sections = [
-      { x: 0, y: 0, width: canvas.width * 0.3, height: canvas.height * 0.4 }, // top left
-      { x: canvas.width * 0.3, y: 0, width: canvas.width * 0.4, height: canvas.height * 0.3 }, // top center
-      { x: canvas.width * 0.7, y: 0, width: canvas.width * 0.3, height: canvas.height * 0.4 }, // top right
-      { x: 0, y: canvas.height * 0.4, width: canvas.width * 0.3, height: canvas.height * 0.3 }, // middle left
-      { x: canvas.width * 0.3, y: canvas.height * 0.3, width: canvas.width * 0.4, height: canvas.height * 0.4 }, // middle center
-      { x: canvas.width * 0.7, y: canvas.height * 0.3, width: canvas.width * 0.3, height: canvas.height * 0.4 }, // middle right
-      { x: 0, y: canvas.height * 0.7, width: canvas.width * 0.33, height: canvas.height * 0.3 }, // bottom left
-      { x: canvas.width * 0.33, y: canvas.height * 0.7, width: canvas.width * 0.33, height: canvas.height * 0.3 }, // bottom center
-      { x: canvas.width * 0.66, y: canvas.height * 0.7, width: canvas.width * 0.34, height: canvas.height * 0.3 }, // bottom right
+      // Top sections
+      { x: 0, y: 0, width: canvas.width * 0.3, height: canvas.height * 0.25 },
+      { x: canvas.width * 0.3, y: 0, width: canvas.width * 0.4, height: canvas.height * 0.2 },
+      { x: canvas.width * 0.7, y: 0, width: canvas.width * 0.3, height: canvas.height * 0.25 },
+      
+      // Upper middle sections
+      { x: 0, y: canvas.height * 0.25, width: canvas.width * 0.2, height: canvas.height * 0.2 },
+      { x: canvas.width * 0.2, y: canvas.height * 0.2, width: canvas.width * 0.2, height: canvas.height * 0.25 },
+      { x: canvas.width * 0.4, y: canvas.height * 0.2, width: canvas.width * 0.2, height: canvas.height * 0.25 },
+      { x: canvas.width * 0.6, y: canvas.height * 0.2, width: canvas.width * 0.2, height: canvas.height * 0.25 },
+      { x: canvas.width * 0.8, y: canvas.height * 0.25, width: canvas.width * 0.2, height: canvas.height * 0.2 },
+      
+      // Middle sections
+      { x: 0, y: canvas.height * 0.45, width: canvas.width * 0.25, height: canvas.height * 0.2 },
+      { x: canvas.width * 0.25, y: canvas.height * 0.45, width: canvas.width * 0.25, height: canvas.height * 0.2 },
+      { x: canvas.width * 0.5, y: canvas.height * 0.45, width: canvas.width * 0.25, height: canvas.height * 0.2 },
+      { x: canvas.width * 0.75, y: canvas.height * 0.45, width: canvas.width * 0.25, height: canvas.height * 0.2 },
+      
+      // Lower sections
+      { x: 0, y: canvas.height * 0.65, width: canvas.width * 0.33, height: canvas.height * 0.35 },
+      { x: canvas.width * 0.33, y: canvas.height * 0.65, width: canvas.width * 0.33, height: canvas.height * 0.35 },
+      { x: canvas.width * 0.66, y: canvas.height * 0.65, width: canvas.width * 0.34, height: canvas.height * 0.35 },
     ];
 
     // Distribute colors across sections
-    // We'll use modulo to repeat colors if there are fewer colors than sections
     sections.forEach((section, i) => {
       const colorIndex = i % sortedColorData.length;
       const colorObj = sortedColorData[colorIndex];
@@ -111,6 +124,11 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
         r = parseInt(hex.substring(0, 2), 16);
         g = parseInt(hex.substring(2, 4), 16);
         b = parseInt(hex.substring(4, 6), 16);
+      } else if (colorObj.color === 'white') {
+        r = g = b = 245; // Slightly off-white for better visibility
+      } else {
+        // Default color for named colors we can't parse
+        r = 100; g = 100; b = 100;
       }
       
       // Apply darker shade for "dark" colorMode
@@ -120,17 +138,12 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
       b = Math.floor(b * multiplier);
       
       // Colorize only the dark pixels in this section (which are the tree branches)
-      // We assume black/dark pixels are part of the tree silhouette
       for (let y = section.y; y < section.y + section.height; y++) {
         for (let x = section.x; x < section.x + section.width; x++) {
           const idx = (y * canvas.width + x) * 4;
           
           // Only color pixels that are part of the tree (dark pixels)
-          // Original image has black tree on transparent background
-          // Alpha value (data[idx + 3]) will be high for tree pixels
           if (data[idx + 3] > 50) { // If there's significant opacity (part of the tree)
-            // Blend the original color with our new color
-            // We keep some of the original darkness for shading effects
             data[idx] = Math.min(r, 255);     // Red
             data[idx + 1] = Math.min(g, 255); // Green
             data[idx + 2] = Math.min(b, 255); // Blue
