@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Leaf, TreePine } from 'lucide-react';
+import { TreePine } from 'lucide-react';
 
 interface ColorData {
   day: number;
@@ -15,9 +15,6 @@ interface ColorTreeProps {
 }
 
 const ColorTree = ({ colorData, month }: ColorTreeProps) => {
-  // Sort data by day to ensure consistent leaf placement
-  const sortedData = [...colorData].sort((a, b) => a.day - b.day);
-  
   return (
     <div className="relative flex flex-col items-center py-8">
       <h3 className="text-lg font-medium mb-6">Color Tree for {month}</h3>
@@ -60,70 +57,10 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
           <div className="absolute bottom-[300px] -left-[20px] w-[40px] h-2 bg-gradient-to-r from-transparent to-gray-600 rounded-full transform rotate-20"></div>
           <div className="absolute bottom-[300px] -right-[20px] w-[40px] h-2 bg-gradient-to-l from-transparent to-gray-600 rounded-full transform -rotate-20"></div>
         </div>
-        
-        {/* Leaves on branches */}
-        <div className="absolute inset-0">
-          {sortedData.map((item, index) => {
-            const totalItems = sortedData.length;
-            // Distribute leaves around the tree in a more natural way
-            const branchPositions = [
-              { bottom: 140, left: -100, rotate: 30 },  // Lower left branch
-              { bottom: 140, left: 100, rotate: -30 },  // Lower right branch
-              { bottom: 180, left: -80, rotate: 15 },   // Mid-left branch
-              { bottom: 180, left: 80, rotate: -15 },   // Mid-right branch
-              { bottom: 220, left: -60, rotate: 5 },    // Upper-left branch
-              { bottom: 220, left: 60, rotate: -5 },    // Upper-right branch
-              { bottom: 260, left: -40, rotate: 20 },   // Upper-left small branch
-              { bottom: 260, left: 40, rotate: -20 },   // Upper-right small branch
-              { bottom: 300, left: -20, rotate: 10 },   // Top-left tiny branch
-              { bottom: 300, left: 20, rotate: -10 },   // Top-right tiny branch
-              { bottom: 340, left: 0, rotate: 0 }       // Tree top
-            ];
-            
-            // Select position based on index
-            const position = branchPositions[index % branchPositions.length];
-            
-            // Add some randomness to leaf positioning
-            const randomOffset = {
-              left: Math.random() * 20 - 10,
-              bottom: Math.random() * 10 - 5,
-            };
-            
-            return (
-              <div 
-                key={`leaf-${item.day}`} 
-                className="absolute"
-                style={{
-                  bottom: `${position.bottom + randomOffset.bottom}px`, 
-                  left: `calc(50% + ${position.left + randomOffset.left}px)`,
-                }}
-              >
-                <div 
-                  className="relative transition-all duration-500 hover:scale-125 cursor-pointer"
-                  title={`Day ${item.day}: ${item.color}${item.note ? ` - ${item.note}` : ''}`}
-                >
-                  <Leaf
-                    className="h-8 w-8 drop-shadow-md"
-                    style={{
-                      color: item.color,
-                      filter: item.colorMode === 'dark' ? 'brightness(0.8)' : 'none',
-                      transform: `rotate(${position.rotate}deg)`,
-                    }}
-                  />
-                  <div 
-                    className="absolute top-full left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-medium mt-1 bg-background/80 px-1 rounded opacity-0 group-hover:opacity-100"
-                  >
-                    Day {item.day}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </div>
       
       <div className="mt-8 text-sm text-muted-foreground">
-        <p className="text-center">Hover over leaves to see details</p>
+        <p className="text-center">A bare tree with no leaves</p>
       </div>
     </div>
   );
