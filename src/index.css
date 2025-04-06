@@ -5,6 +5,7 @@
 
 @layer base {
   :root {
+    /* Default blue theme - will be overridden by JavaScript */
     --background: 226 100% 98%;
     --foreground: 224 71% 4%;
 
@@ -43,6 +44,49 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Rainbow theme variables */
+    /* Red */
+    --red-primary: 0 85% 60%;
+    --red-accent: 0 90% 50%;
+    --red-ring: 0 95% 40%;
+    
+    /* Orange */
+    --orange-primary: 30 90% 55%;
+    --orange-accent: 27 95% 50%;
+    --orange-ring: 25 100% 45%;
+    
+    /* Yellow */
+    --yellow-primary: 48 95% 55%;
+    --yellow-accent: 45 100% 50%;
+    --yellow-ring: 43 100% 45%;
+    
+    /* Green */
+    --green-primary: 142 70% 45%;
+    --green-accent: 140 75% 40%;
+    --green-ring: 138 80% 35%;
+    
+    /* Blue - default, already set */
+    
+    /* Indigo */
+    --indigo-primary: 245 70% 50%;
+    --indigo-accent: 243 75% 45%;
+    --indigo-ring: 240 80% 40%;
+    
+    /* Violet */
+    --violet-primary: 270 70% 60%;
+    --violet-accent: 268 75% 55%;
+    --violet-ring: 265 80% 50%;
+    
+    /* Pink */
+    --pink-primary: 330 85% 60%;
+    --pink-accent: 328 90% 55%;
+    --pink-ring: 325 95% 50%;
+    
+    /* Teal */
+    --teal-primary: 180 70% 40%;
+    --teal-accent: 178 75% 35%;
+    --teal-ring: 175 80% 30%;
   }
 
   .dark {
