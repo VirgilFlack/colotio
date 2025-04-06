@@ -8,6 +8,22 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter,
+  DialogClose
+} from "@/components/ui/dialog";
+import { format, subMonths } from 'date-fns';
 
 interface ColorData {
   day: number;
@@ -46,7 +62,15 @@ const Index = () => {
   const [hasData, setHasData] = useState(false);
   const [userName, setUserName] = useState('User');
   const [positiveMessage, setPositiveMessage] = useState('');
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'MMMM yyyy'));
   
+  // Generate last 12 months as options
+  const monthOptions = Array.from({ length: 12 }, (_, i) => {
+    const date = subMonths(new Date(), i);
+    return format(date, 'MMMM yyyy');
+  });
+
   useEffect(() => {
     const storedName = localStorage.getItem('userName');
     if (storedName) {
@@ -127,10 +151,18 @@ const Index = () => {
   }, []);
   
   const handleGenerateReport = () => {
-    toast.success("Generating color report. It will be ready shortly.", {
+    setReportDialogOpen(true);
+  };
+
+  const generateMonthlyReport = () => {
+    setReportDialogOpen(false);
+    toast.success(`Generating color report for ${selectedMonth}. It will be ready shortly.`, {
       description: "You'll receive a notification when it's complete.",
       duration: 5000,
     });
+    
+    // Here you would typically filter data for the selected month
+    // and then generate a report with that data
   };
 
   const goToDataInput = () => {
@@ -241,6 +273,44 @@ const Index = () => {
           )}
         </div>
       </main>
+
+      <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Generate Monthly Color Report</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="month-select" className="text-sm font-medium">
+                  Select Month
+                </label>
+                <Select
+                  value={selectedMonth}
+                  onValueChange={setSelectedMonth}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select month" />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    {monthOptions.map((month) => (
+                      <SelectItem key={month} value={month}>
+                        {month}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button onClick={generateMonthlyReport}>Generate</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
