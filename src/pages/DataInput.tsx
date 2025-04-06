@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -57,9 +56,7 @@ const ALLOWED_COLORS = {
   Yellow: "#FFFF00", 
   Green: "#00FF00",
   Purple: "#800080",
-  Orange: "#FFA500",
-  Black: "#000000",
-  White: "#FFFFFF"
+  Orange: "#FFA500"
 };
 
 interface DayColorData {
