@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -25,7 +26,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Calendar, Info } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Dialog,
@@ -184,6 +184,9 @@ const DataInput = () => {
       style={{ backgroundColor: color }}
     />
   );
+
+  // Generate array of days 1-30 for the dropdown
+  const days = Array.from({ length: 30 }, (_, i) => i + 1);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -434,16 +437,22 @@ const DataInput = () => {
                   <div className="flex flex-col gap-6">
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Select day (1-30)</p>
-                      <div className="flex items-center gap-4">
-                        <Slider 
-                          value={[currentDay]} 
-                          min={1} 
-                          max={30} 
-                          step={1} 
-                          onValueChange={(value) => setCurrentDay(value[0])}
-                          className="max-w-md"
-                        />
-                        <span className="font-medium">Day {currentDay}</span>
+                      <div className="max-w-xs">
+                        <Select
+                          value={currentDay.toString()}
+                          onValueChange={(value) => setCurrentDay(parseInt(value))}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select day" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {days.map((day) => (
+                              <SelectItem key={day} value={day.toString()}>
+                                Day {day}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                     
