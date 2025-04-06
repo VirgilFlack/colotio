@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { cn } from "@/lib/utils";
 
 interface ColorData {
@@ -17,6 +16,8 @@ interface ColorTreeProps {
 const ColorTree = ({ colorData, month }: ColorTreeProps) => {
   // Sort color data by day to ensure chronological order
   const sortedColorData = [...colorData].sort((a, b) => a.day - b.day);
+  const treeRef = useRef<HTMLImageElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // Define leaf positions following the natural branch structure of the tree
   // Each position represents [x%, y%] coordinates relative to the container
@@ -63,15 +64,111 @@ const ColorTree = ({ colorData, month }: ColorTreeProps) => {
     return lightColors.includes(color.toLowerCase());
   };
 
+  // Function to color the tree branches
+  const colorTreeBranches = () => {
+    if (!treeRef.current || !canvasRef.current || sortedColorData.length === 0) return;
+    
+    const img = treeRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Set canvas dimensions to match the image
+    canvas.width = img.width;
+    canvas.height = img.height;
+    
+    // Draw the original tree image
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    
+    // Get image data to manipulate
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    
+    // Section the tree image into rough sections based on the quadrants
+    const sections = [
+      { x: 0, y: 0, width: canvas.width * 0.3, height: canvas.height * 0.4 }, // top left
+      { x: canvas.width * 0.3, y: 0, width: canvas.width * 0.4, height: canvas.height * 0.3 }, // top center
+      { x: canvas.width * 0.7, y: 0, width: canvas.width * 0.3, height: canvas.height * 0.4 }, // top right
+      { x: 0, y: canvas.height * 0.4, width: canvas.width * 0.3, height: canvas.height * 0.3 }, // middle left
+      { x: canvas.width * 0.3, y: canvas.height * 0.3, width: canvas.width * 0.4, height: canvas.height * 0.4 }, // middle center
+      { x: canvas.width * 0.7, y: canvas.height * 0.3, width: canvas.width * 0.3, height: canvas.height * 0.4 }, // middle right
+      { x: 0, y: canvas.height * 0.7, width: canvas.width * 0.33, height: canvas.height * 0.3 }, // bottom left
+      { x: canvas.width * 0.33, y: canvas.height * 0.7, width: canvas.width * 0.33, height: canvas.height * 0.3 }, // bottom center
+      { x: canvas.width * 0.66, y: canvas.height * 0.7, width: canvas.width * 0.34, height: canvas.height * 0.3 }, // bottom right
+    ];
+
+    // Distribute colors across sections
+    // We'll use modulo to repeat colors if there are fewer colors than sections
+    sections.forEach((section, i) => {
+      const colorIndex = i % sortedColorData.length;
+      const colorObj = sortedColorData[colorIndex];
+      
+      // Convert color to RGB
+      let r = 0, g = 0, b = 0;
+      
+      if (colorObj.color.startsWith('#')) {
+        const hex = colorObj.color.substring(1);
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
+      }
+      
+      // Apply darker shade for "dark" colorMode
+      const multiplier = colorObj.colorMode === 'dark' ? 0.7 : 1.0; 
+      r = Math.floor(r * multiplier);
+      g = Math.floor(g * multiplier);
+      b = Math.floor(b * multiplier);
+      
+      // Colorize only the dark pixels in this section (which are the tree branches)
+      // We assume black/dark pixels are part of the tree silhouette
+      for (let y = section.y; y < section.y + section.height; y++) {
+        for (let x = section.x; x < section.x + section.width; x++) {
+          const idx = (y * canvas.width + x) * 4;
+          
+          // Only color pixels that are part of the tree (dark pixels)
+          // Original image has black tree on transparent background
+          // Alpha value (data[idx + 3]) will be high for tree pixels
+          if (data[idx + 3] > 50) { // If there's significant opacity (part of the tree)
+            // Blend the original color with our new color
+            // We keep some of the original darkness for shading effects
+            data[idx] = Math.min(r, 255);     // Red
+            data[idx + 1] = Math.min(g, 255); // Green
+            data[idx + 2] = Math.min(b, 255); // Blue
+            // Keep alpha the same to preserve the tree shape
+          }
+        }
+      }
+    });
+    
+    // Put the modified image data back on the canvas
+    ctx.putImageData(imageData, 0, 0);
+  };
+  
+  // Run the coloring effect when the component mounts or data changes
+  useEffect(() => {
+    if (treeRef.current && treeRef.current.complete) {
+      colorTreeBranches();
+    } else if (treeRef.current) {
+      treeRef.current.onload = colorTreeBranches;
+    }
+  }, [sortedColorData, treeRef.current]);
+
   return (
     <div className="relative flex flex-col items-center py-8">
       <h3 className="text-lg font-medium mb-6">Color Visualization for {month}</h3>
       
       <div className="relative w-full max-w-2xl h-[600px] flex justify-center">
-        {/* Tree base image */}
+        {/* Hidden original tree image, used as reference */}
         <img 
+          ref={treeRef}
           src="/lovable-uploads/b4a925c8-0789-4a93-8764-edebd279fb54.png" 
           alt="Bare tree silhouette" 
+          className="hidden"
+        />
+        
+        {/* Canvas for the colored tree */}
+        <canvas 
+          ref={canvasRef} 
           className="h-full object-contain"
         />
 
