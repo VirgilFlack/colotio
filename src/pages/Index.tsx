@@ -23,7 +23,7 @@ import {
   DialogClose
 } from "@/components/ui/dialog";
 import { format, subMonths } from 'date-fns';
-import { ColorData, sampleAprilData } from '@/utils/sampleData';
+import { ColorData, getColorDataForMonth } from '@/utils/sampleData';
 
 interface UserData {
   datasetName: string;
@@ -70,86 +70,45 @@ const Index = () => {
     const randomIndex = Math.floor(Math.random() * positiveMessages.length);
     setPositiveMessage(positiveMessages[randomIndex]);
 
-    loadColorData();
+    loadColorData(format(new Date(), 'MMMM yyyy'));
   }, []);
 
-  const loadColorData = () => {
-    const userData = localStorage.getItem('userData');
-    
-    if (userData) {
-      try {
-        const parsedData: UserData = JSON.parse(userData);
-        
-        // Use April 2025 sample data if we're in the current month (for demo purposes)
-        const currentMonthName = format(new Date(), 'MMMM yyyy');
-        if (currentMonthName === 'April 2025' && (!parsedData.colorData || parsedData.colorData.length === 0)) {
-          setColorData(sampleAprilData);
-          setDatasetName('April 2025 Colors');
-          setDescription('Sample color data for April 2025');
-          setHasData(true);
-          return;
-        }
-        
-        const processedColorData = parsedData.colorData?.map(item => {
-          if ('lightColor' in item || 'darkColor' in item) {
-            if (item.lightColor) {
-              return {
-                day: item.day,
-                color: item.lightColor,
-                colorMode: 'light' as const,
-                note: item.note
-              };
-            } else if (item.darkColor) {
-              return {
-                day: item.day,
-                color: item.darkColor,
-                colorMode: 'dark' as const,
-                note: item.note
-              };
-            }
-          }
-          return item;
-        }).sort((a, b) => a.day - b.day); // Sort by day
-        
-        setColorData(processedColorData || []);
+  const loadColorData = (month: string) => {
+    try {
+      const data = getColorDataForMonth(month);
+      
+      const userData = localStorage.getItem('userData');
+      if (userData) {
+        const parsedData = JSON.parse(userData);
         setDatasetName(parsedData.datasetName || '');
         setDescription(parsedData.description || '');
-        setHasData(Boolean(processedColorData?.length));
-      } catch (e) {
-        console.error('Error parsing stored data', e);
-        setColorData([]);
-        setDatasetName('');
-        setDescription('');
-        setHasData(false);
-      }
-    } else {
-      // If no data is found in localStorage, use sample data for April 2025
-      const currentMonthName = format(new Date(), 'MMMM yyyy');
-      if (currentMonthName === 'April 2025') {
-        setColorData(sampleAprilData);
+      } else if (month === 'April 2025') {
         setDatasetName('April 2025 Colors');
         setDescription('Sample color data for April 2025');
-        setHasData(true);
-      } else {
-        setColorData([]);
-        setDatasetName('');
-        setDescription('');
-        setHasData(false);
       }
+      
+      setColorData(data);
+      setHasData(data.length > 0);
+    } catch (e) {
+      console.error('Error loading color data for dashboard', e);
+      setColorData([]);
+      setDatasetName('');
+      setDescription('');
+      setHasData(false);
     }
   };
   
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'userData' || e.key === null || e.key.includes('color') || e.key.includes('Color')) {
-        loadColorData();
+        loadColorData(selectedMonth);
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     
     const handleDataErased = () => {
-      loadColorData();
+      loadColorData(selectedMonth);
     };
     window.addEventListener('colorDataErased', handleDataErased);
 
@@ -157,7 +116,7 @@ const Index = () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('colorDataErased', handleDataErased);
     };
-  }, []);
+  }, [selectedMonth]);
   
   const handleGenerateReport = () => {
     setReportDialogOpen(true);
@@ -296,7 +255,10 @@ const Index = () => {
                 </label>
                 <Select
                   value={selectedMonth}
-                  onValueChange={setSelectedMonth}
+                  onValueChange={(value) => {
+                    setSelectedMonth(value);
+                    loadColorData(value);
+                  }}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select month" />

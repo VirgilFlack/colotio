@@ -5,14 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from 'lucide-react';
 import ColorTree from '@/components/ColorTree';
-import { parse, format } from 'date-fns';
-import { ColorData, sampleAprilData } from '@/utils/sampleData';
-
-interface UserData {
-  datasetName: string;
-  description?: string;
-  colorData: ColorData[];
-}
+import { ColorData, getColorDataForMonth } from '@/utils/sampleData';
 
 const MonthlyReport = () => {
   const location = useLocation();
@@ -39,53 +32,9 @@ const MonthlyReport = () => {
     setLoading(true);
     
     try {
-      // If the month is April 2025, use our sample data
-      if (month === 'April 2025') {
-        setColorData(sampleAprilData);
-        setLoading(false);
-        return;
-      }
-      
-      // Otherwise, load user data from localStorage as before
-      const userData = localStorage.getItem('userData');
-      
-      if (userData) {
-        const parsedData: UserData = JSON.parse(userData);
-        
-        // Process and filter data for the selected month
-        const monthDate = parse(month, 'MMMM yyyy', new Date());
-        const processedColorData = parsedData.colorData
-          ?.filter(item => {
-            // We need to check if the color data belongs to the selected month
-            // This is a simplified approach assuming the day property represents the day of the month
-            return item.day >= 1 && item.day <= 31;
-          })
-          .map(item => {
-            if ('lightColor' in item || 'darkColor' in item) {
-              if (item.lightColor) {
-                return {
-                  day: item.day,
-                  color: item.lightColor,
-                  colorMode: 'light' as const,
-                  note: item.note
-                };
-              } else if (item.darkColor) {
-                return {
-                  day: item.day,
-                  color: item.darkColor,
-                  colorMode: 'dark' as const,
-                  note: item.note
-                };
-              }
-            }
-            return item;
-          })
-          .sort((a, b) => a.day - b.day); // Sort by day ascending
-        
-        setColorData(processedColorData || []);
-      } else {
-        setColorData([]);
-      }
+      // Use our helper function to get color data for the month
+      const data = getColorDataForMonth(month);
+      setColorData(data);
     } catch (e) {
       console.error('Error loading color data', e);
       setColorData([]);
