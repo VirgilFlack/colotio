@@ -16,6 +16,7 @@ const Navbar = () => {
   const [searchValue, setSearchValue] = useState('');
   const [userName, setUserName] = useState('');
   const [userInitial, setUserInitial] = useState('');
+  const [logoColor, setLogoColor] = useState('gradient-blue-purple');
   const isMobile = useIsMobile();
   const navigate = useNavigate();
 
@@ -25,6 +26,24 @@ const Navbar = () => {
       setUserName(storedName);
       setUserInitial(storedName.charAt(0).toUpperCase());
     }
+    
+    // Get the current theme color from localStorage
+    const currentTheme = localStorage.getItem('colorTheme') || 'blue';
+    
+    // Map theme colors to logo gradient classes
+    const themeToGradient = {
+      'red': 'bg-gradient-to-r from-red-500 to-red-600',
+      'orange': 'bg-gradient-to-r from-orange-500 to-orange-600',
+      'yellow': 'bg-gradient-to-r from-yellow-500 to-yellow-600',
+      'green': 'bg-gradient-to-r from-green-500 to-green-600',
+      'blue': 'bg-gradient-blue-purple', // Default
+      'indigo': 'bg-gradient-to-r from-indigo-500 to-indigo-600',
+      'violet': 'bg-gradient-to-r from-violet-500 to-violet-600',
+      'pink': 'bg-gradient-to-r from-pink-500 to-pink-600',
+      'teal': 'bg-gradient-to-r from-teal-500 to-teal-600'
+    };
+    
+    setLogoColor(themeToGradient[currentTheme] || 'bg-gradient-blue-purple');
   }, []);
 
   const handleUserButtonClick = () => {
@@ -54,10 +73,10 @@ const Navbar = () => {
             </Sheet>
           )}
           <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-md bg-gradient-blue-purple flex items-center justify-center">
+            <div className={`w-8 h-8 rounded-md ${logoColor} flex items-center justify-center`}>
               <span className="text-white font-bold text-lg">C</span>
             </div>
-            <span className="text-xl font-bold gradient-text hidden sm:inline-block">Colotio</span>
+            <span className={`text-xl font-bold ${logoColor} bg-clip-text text-transparent`}>Colotio</span>
           </Link>
         </div>
         

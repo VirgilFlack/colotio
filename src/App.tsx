@@ -64,6 +64,9 @@ const App = () => {
       }
       
       console.log(`Applied random color theme: ${selectedTheme}`);
+      
+      // Force a re-render of components that need to update with the new theme
+      window.dispatchEvent(new Event('storage'));
     };
     
     // Set the random color theme on page load
