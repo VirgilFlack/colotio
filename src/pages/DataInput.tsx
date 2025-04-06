@@ -25,7 +25,7 @@ import {
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Calendar, Info } from "lucide-react";
+import { Calendar, Info, EyeIcon } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Dialog,
@@ -42,6 +42,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const ALLOWED_COLORS = {
   Red: "#FF0000",
@@ -79,6 +87,7 @@ type FormData = z.infer<typeof dataSchema>;
 const DataInput = () => {
   const navigate = useNavigate();
   const [currentDay, setCurrentDay] = useState(1);
+  const [previousDaysDialogOpen, setPreviousDaysDialogOpen] = useState(false);
 
   const currentMonthName = new Date().toLocaleString('default', { month: 'long' });
   const currentYear = new Date().getFullYear();
@@ -187,6 +196,9 @@ const DataInput = () => {
 
   // Generate array of days 1-30 for the dropdown
   const days = Array.from({ length: 30 }, (_, i) => i + 1);
+
+  // Filter color data to get only days with colors
+  const daysWithColors = colorData.filter(day => day.color && day.colorMode);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -425,10 +437,80 @@ const DataInput = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    Color Data (30 Days)
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5" />
+                      <CardTitle>Color Data (30 Days)</CardTitle>
+                    </div>
+                    <Dialog open={previousDaysDialogOpen} onOpenChange={setPreviousDaysDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="gap-1">
+                          <EyeIcon className="h-4 w-4" />
+                          View Previous Days
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Previous Days Color Data</DialogTitle>
+                          <DialogDescription>
+                            Overview of all the days you've already recorded colors for
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4">
+                          {daysWithColors.length === 0 ? (
+                            <p className="text-muted-foreground text-center py-8">
+                              No color data recorded yet. Start by selecting a day and adding a color.
+                            </p>
+                          ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {daysWithColors.map((day) => (
+                                <Card key={day.day} className="overflow-hidden">
+                                  <div 
+                                    className="h-2" 
+                                    style={{ backgroundColor: day.color }}
+                                  />
+                                  <CardContent className="p-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <h3 className="font-medium">Day {day.day}</h3>
+                                      <div className="flex items-center gap-2">
+                                        <div 
+                                          className="w-4 h-4 rounded-full border" 
+                                          style={{ backgroundColor: day.color }}
+                                        />
+                                        <span className="text-sm">{getColorNameFromHex(day.color || '')}</span>
+                                        <span className="text-xs text-muted-foreground">
+                                          ({day.colorMode})
+                                        </span>
+                                      </div>
+                                    </div>
+                                    {day.note && (
+                                      <p className="text-sm text-muted-foreground truncate">
+                                        {day.note}
+                                      </p>
+                                    )}
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="mt-2 w-full text-xs"
+                                      onClick={() => {
+                                        setCurrentDay(day.day);
+                                        setPreviousDaysDialogOpen(false);
+                                      }}
+                                    >
+                                      Edit
+                                    </Button>
+                                  </CardContent>
+                                </Card>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex justify-end">
+                          <Button onClick={() => setPreviousDaysDialogOpen(false)}>Close</Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                   <CardDescription>
                     Select a color and choose light or dark mode for each day
                   </CardDescription>
