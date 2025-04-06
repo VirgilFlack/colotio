@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from 'lucide-react';
 import ColorFadeCircle from '@/components/ColorFadeCircle';
+import ColorTree from '@/components/ColorTree';
 import { parse, format } from 'date-fns';
 
 interface ColorData {
@@ -129,6 +130,15 @@ const MonthlyReport = () => {
             </div>
           ) : colorData.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="col-span-1 md:col-span-2">
+                <CardHeader>
+                  <CardTitle>Color Tree Visualization</CardTitle>
+                </CardHeader>
+                <CardContent className="flex justify-center">
+                  <ColorTree colorData={colorData} month={selectedMonth} />
+                </CardContent>
+              </Card>
+              
               <Card className="col-span-1 md:col-span-2">
                 <CardHeader>
                   <CardTitle>Color Progression Circle</CardTitle>
