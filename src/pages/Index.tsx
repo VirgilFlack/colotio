@@ -156,10 +156,6 @@ const Index = () => {
               </p>
             </div>
             <div className="flex gap-2 flex-shrink-0">
-              <Button onClick={goToDataInput} variant="outline" className="gap-2">
-                <PlusCircle className="h-4 w-4" />
-                {hasData ? 'Edit Colors' : 'Add Colors'}
-              </Button>
               {hasData && (
                 <Button onClick={handleGenerateReport} className="gap-2">
                   <PlusCircle className="h-4 w-4" />
